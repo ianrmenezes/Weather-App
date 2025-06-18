@@ -56,7 +56,7 @@ A beautiful and interactive weather application built with Python and Streamlit 
    ```
 
 5. **Open your browser**
-   - Navigate to `http://localhost:8501`
+   - Navigate to [http://localhost:8501](http://localhost:8501) (or the port shown in your terminal)
    - Enter a city name and explore the weather data!
 
 ## 📋 Dependencies
