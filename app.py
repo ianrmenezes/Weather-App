@@ -23,6 +23,56 @@ st.set_page_config(
 # Custom CSS for enhanced styling
 st.markdown("""
 <style>
+    /* Custom tab styling */
+    [data-testid="stTabs"] {
+        background: transparent;
+    }
+
+    [data-testid="stTabs"] > div:first-child {
+        background: transparent !important;
+        border: none !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    [data-testid="stTabs"] div[role="tablist"] {
+        background: transparent !important;
+        border: none !important;
+        display: flex;
+        gap: 8px;
+        padding: 0 !important;
+        margin-bottom: 16px;
+    }
+
+    [data-testid="stTabs"] button[role="tab"] {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: none !important;
+        border-radius: 8px !important;
+        color: rgba(255, 255, 255, 0.7) !important;
+        padding: 8px 16px !important;
+        transition: all 0.3s ease !important;
+    }
+
+    [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
+        background: rgba(102, 126, 234, 0.6) !important;
+        color: white !important;
+        font-weight: bold !important;
+    }
+
+    [data-testid="stTabs"] button[role="tab"]:hover {
+        background: rgba(102, 126, 234, 0.4) !important;
+        color: white !important;
+    }
+
+    /* Remove all default tab styling */
+    [data-testid="stTabs"] *::before,
+    [data-testid="stTabs"] *::after {
+        display: none !important;
+        content: none !important;
+        border: none !important;
+        background: none !important;
+    }
+
     /* Space background with stars - simplified */
     .stApp {
         background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
@@ -417,8 +467,10 @@ def display_current_weather(weather_data, city):
         <div class="weather-card fade-in" style="max-width: 320px; margin: 0 auto;">
             <div class="weather-icon-large">{weather_icon}</div>
             <div class="temperature-display">{temp:.1f}°C</div>
-            <h4 style="text-align: center; margin: 0.2rem 0; font-size: 1.1rem;">{weather_desc}</h4>
-            <p style="text-align: center; font-size: 0.85rem;">{city}</p>
+            <div style="text-align: center; margin: 0.2rem 0;">
+                <h4 style="margin: 0.2rem 0; font-size: 1.1rem;">{weather_desc}</h4>
+                <p style="margin: 0.2rem 0; font-size: 0.85rem;">{city}</p>
+            </div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -489,7 +541,14 @@ def display_current_weather(weather_data, city):
     
     with col4:
         # UV Index (simulated since free API doesn't include it)
-        uv_index = "Moderate" if temp > 20 else "Low"
+        if temp > 25:
+            uv_index = "High (8-10)"
+        elif temp > 20:
+            uv_index = "Moderate (5-7)"
+        elif temp > 10:
+            uv_index = "Low (3-4)"
+        else:
+            uv_index = "Very Low (1-2)"
         st.markdown(f"""
         <div class="metric-card">
             <h6>☀️ UV Index</h6>
