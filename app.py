@@ -23,6 +23,32 @@ st.set_page_config(
 # Custom CSS for enhanced styling
 st.markdown("""
 <style>
+    /* Space background with stars - simplified */
+    .stApp {
+        background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+    }
+    
+    /* Simple star overlay */
+    .stApp::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(1px 1px at 20px 30px, #fff, transparent),
+            radial-gradient(1px 1px at 40px 70px, #fff, transparent),
+            radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+            radial-gradient(1px 1px at 130px 80px, #fff, transparent),
+            radial-gradient(1px 1px at 160px 30px, #fff, transparent);
+        background-repeat: repeat;
+        background-size: 200px 100px;
+        opacity: 0.6;
+        pointer-events: none;
+        z-index: 0;
+    }
+    
     /* Main styling */
     .main-header {
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
@@ -31,7 +57,11 @@ st.markdown("""
         margin-bottom: 1rem;
         text-align: center;
         color: white;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.1);
+        position: relative;
+        z-index: 10;
     }
     
     .weather-card {
@@ -40,9 +70,12 @@ st.markdown("""
         border-radius: 20px;
         color: white;
         margin: 0.3rem 0;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         border: 1px solid rgba(255,255,255,0.2);
         text-align: center;
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 10;
     }
     
     .metric-card {
@@ -53,6 +86,9 @@ st.markdown("""
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255,255,255,0.2);
         margin: 0.2rem;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        position: relative;
+        z-index: 10;
     }
     
     .forecast-card {
@@ -61,7 +97,11 @@ st.markdown("""
         border-radius: 15px;
         color: white;
         margin: 0.2rem 0;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.1);
+        position: relative;
+        z-index: 10;
     }
     
     .climate-summary {
@@ -72,6 +112,10 @@ st.markdown("""
         border-left: 5px solid #667eea;
         color: white;
         height: 100%;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        position: relative;
+        z-index: 10;
     }
     
     .input-container {
@@ -81,12 +125,17 @@ st.markdown("""
         color: white;
         margin: 1rem 0;
         text-align: center;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 10;
     }
     
     .sidebar .sidebar-content {
         background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
         width: 200px;
+        position: relative;
+        z-index: 10;
     }
     
     .stButton > button {
@@ -96,14 +145,16 @@ st.markdown("""
         border-radius: 25px;
         padding: 0.5rem 1.5rem;
         font-weight: bold;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.3);
         transition: all 0.3s ease;
         font-size: 0.9rem;
+        position: relative;
+        z-index: 10;
     }
     
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.4);
     }
     
     .city-input {
@@ -112,6 +163,8 @@ st.markdown("""
         border-radius: 10px;
         color: white;
         padding: 0.5rem;
+        position: relative;
+        z-index: 10;
     }
     
     .city-input::placeholder {
@@ -132,19 +185,25 @@ st.markdown("""
     }
     
     .chart-container {
-        background: white;
+        background: rgba(255,255,255,0.95);
         padding: 0.8rem;
         border-radius: 15px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
         margin: 0.3rem 0;
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 10;
     }
     
     .map-container {
-        background: white;
+        background: rgba(255,255,255,0.95);
         padding: 0.8rem;
         border-radius: 15px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
         margin: 0.3rem 0;
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 10;
     }
     
     .feature-highlight {
@@ -155,6 +214,9 @@ st.markdown("""
         border-left: 5px solid #FF8C00;
         color: black;
         height: 100%;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        position: relative;
+        z-index: 10;
     }
     
     .loading-animation {
@@ -169,7 +231,10 @@ st.markdown("""
         color: white;
         text-align: center;
         margin-top: 2rem;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 10;
     }
     
     .sidebar-credit {
@@ -186,6 +251,9 @@ st.markdown("""
         margin-top: 1rem;
         width: 100%;
         max-width: none;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        position: relative;
+        z-index: 10;
     }
     
     /* Custom animations */
@@ -212,10 +280,36 @@ st.markdown("""
     section[data-testid="stSidebar"] > div {
         padding-top: 1rem;
         width: 200px;
+        position: relative;
+        z-index: 10;
     }
     
     section[data-testid="stSidebar"] > div > div {
         width: 200px;
+        position: relative;
+        z-index: 10;
+    }
+    
+    /* Ensure all Streamlit elements are visible */
+    [data-testid="stSidebar"] {
+        position: relative;
+        z-index: 10;
+    }
+    
+    [data-testid="stSidebar"] * {
+        position: relative;
+        z-index: 10;
+    }
+    
+    /* Force all content to be visible */
+    .main .block-container, .main .block-container * {
+        position: relative;
+        z-index: 10;
+    }
+    
+    .stMarkdown, .stButton, .stTextInput, .stTabs, .stColumns {
+        position: relative;
+        z-index: 10;
     }
 </style>
 """, unsafe_allow_html=True)
