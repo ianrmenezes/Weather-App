@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import folium
 from streamlit_folium import folium_static
 from datetime import datetime, timedelta
@@ -11,12 +12,213 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Page configuration
+# Page configuration with enhanced styling
 st.set_page_config(
-    page_title="Weather App",
+    page_title="🌤️ Weather App",
     page_icon="🌤️",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
+
+# Custom CSS for enhanced styling
+st.markdown("""
+<style>
+    /* Main styling */
+    .main-header {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem;
+        border-radius: 15px;
+        margin-bottom: 1rem;
+        text-align: center;
+        color: white;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .weather-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 0.8rem;
+        border-radius: 20px;
+        color: white;
+        margin: 0.3rem 0;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        text-align: center;
+    }
+    
+    .metric-card {
+        background: rgba(255,255,255,0.1);
+        padding: 0.6rem;
+        border-radius: 15px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        margin: 0.2rem;
+    }
+    
+    .forecast-card {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        padding: 0.6rem;
+        border-radius: 15px;
+        color: white;
+        margin: 0.2rem 0;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    
+    .climate-summary {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        padding: 0.8rem;
+        border-radius: 15px;
+        margin: 0.3rem 0;
+        border-left: 5px solid #667eea;
+        color: white;
+        height: 100%;
+    }
+    
+    .input-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem;
+        border-radius: 15px;
+        color: white;
+        margin: 1rem 0;
+        text-align: center;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    
+    .sidebar .sidebar-content {
+        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        width: 200px;
+    }
+    
+    .stButton > button {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 0.5rem 1.5rem;
+        font-weight: bold;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    
+    .city-input {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 10px;
+        color: white;
+        padding: 0.5rem;
+    }
+    
+    .city-input::placeholder {
+        color: rgba(255,255,255,0.7);
+    }
+    
+    .weather-icon-large {
+        font-size: 2.5rem;
+        text-align: center;
+        margin: 0.3rem 0;
+    }
+    
+    .temperature-display {
+        font-size: 2rem;
+        font-weight: bold;
+        text-align: center;
+        margin: 0.3rem 0;
+    }
+    
+    .chart-container {
+        background: white;
+        padding: 0.8rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        margin: 0.3rem 0;
+    }
+    
+    .map-container {
+        background: white;
+        padding: 0.8rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        margin: 0.3rem 0;
+    }
+    
+    .feature-highlight {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        padding: 0.6rem;
+        border-radius: 15px;
+        margin: 0.3rem 0;
+        border-left: 5px solid #FF8C00;
+        color: black;
+        height: 100%;
+    }
+    
+    .loading-animation {
+        text-align: center;
+        padding: 0.8rem;
+    }
+    
+    .developer-credit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem;
+        border-radius: 15px;
+        color: white;
+        text-align: center;
+        margin-top: 2rem;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    
+    .sidebar-credit {
+        background: rgba(255,255,255,0.1);
+        padding: 1.2rem 1rem;
+        border-radius: 10px;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: bold;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        word-wrap: break-word;
+        box-sizing: border-box;
+        margin-top: 1rem;
+        width: 100%;
+        max-width: none;
+    }
+    
+    /* Custom animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .weather-card {
+            padding: 0.8rem;
+        }
+        .temperature-display {
+            font-size: 2rem;
+        }
+    }
+    
+    /* Make sidebar smaller */
+    section[data-testid="stSidebar"] > div {
+        padding-top: 1rem;
+        width: 200px;
+    }
+    
+    section[data-testid="stSidebar"] > div > div {
+        width: 200px;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # API Configuration
 API_KEY = os.getenv("OPENWEATHER_API_KEY", "your_api_key_here")
@@ -56,10 +258,6 @@ def get_forecast_data(city, api_key):
         st.error(f"Error fetching forecast data: {e}")
         return None
 
-def kelvin_to_celsius(kelvin):
-    """Convert Kelvin to Celsius"""
-    return kelvin - 273.15
-
 def get_weather_icon(weather_code):
     """Get weather icon based on weather code"""
     icons = {
@@ -75,61 +273,174 @@ def get_weather_icon(weather_code):
     }
     return icons.get(weather_code[:2], '🌤️')
 
-def display_current_weather(weather_data):
-    """Display current weather information"""
+def get_weather_color(temp):
+    """Get color based on temperature"""
+    if temp < 0:
+        return '#87CEEB'  # Light blue for cold
+    elif temp < 15:
+        return '#98FB98'  # Light green for cool
+    elif temp < 25:
+        return '#FFD700'  # Gold for warm
+    else:
+        return '#FF6347'  # Tomato for hot
+
+def get_climate_summary(city, temp, weather_desc):
+    """Generate climate summary based on current conditions"""
+    if temp < 0:
+        climate = "Cold winter conditions"
+        season = "Winter"
+    elif temp < 15:
+        climate = "Cool spring/autumn weather"
+        season = "Spring/Autumn"
+    elif temp < 25:
+        climate = "Pleasant warm weather"
+        season = "Spring/Summer"
+    else:
+        climate = "Hot summer conditions"
+        season = "Summer"
+    
+    return {
+        'climate': climate,
+        'season': season,
+        'description': f"{city} experiences {climate.lower()} with {weather_desc.lower()} conditions."
+    }
+
+def display_current_weather(weather_data, city):
+    """Display current weather information with enhanced UI in center"""
     if not weather_data:
         return
     
-    col1, col2, col3 = st.columns(3)
+    # Main weather card in center
+    temp = weather_data['main']['temp']
+    weather_icon = get_weather_icon(weather_data['weather'][0]['icon'])
+    weather_desc = weather_data['weather'][0]['description'].title()
     
-    with col1:
-        st.metric(
-            label="Temperature",
-            value=f"{weather_data['main']['temp']:.1f}°C",
-            delta=f"{weather_data['main']['feels_like']:.1f}°C (feels like)"
-        )
+    # Center the main weather display
+    col1, col2, col3 = st.columns([1.2, 1.6, 1.2])
     
     with col2:
-        st.metric(
-            label="Humidity",
-            value=f"{weather_data['main']['humidity']}%"
-        )
+        st.markdown(f"""
+        <div class="weather-card fade-in" style="max-width: 320px; margin: 0 auto;">
+            <div class="weather-icon-large">{weather_icon}</div>
+            <div class="temperature-display">{temp:.1f}°C</div>
+            <h4 style="text-align: center; margin: 0.2rem 0; font-size: 1.1rem;">{weather_desc}</h4>
+            <p style="text-align: center; font-size: 0.85rem;">{city}</p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    with col3:
-        st.metric(
-            label="Wind Speed",
-            value=f"{weather_data['wind']['speed']} m/s"
-        )
+    # Weather metrics in a grid below
+    st.markdown("### 📊 Weather Details")
     
-    # Weather description
-    weather_desc = weather_data['weather'][0]['description'].title()
-    weather_icon = get_weather_icon(weather_data['weather'][0]['icon'])
-    
-    st.markdown(f"### {weather_icon} {weather_desc}")
-    
-    # Additional details
+    # First row of metrics
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.info(f"**Pressure:** {weather_data['main']['pressure']} hPa")
+        st.markdown(f"""
+        <div class="metric-card">
+            <h6>🌡️ Feels Like</h6>
+            <h5>{weather_data['main']['feels_like']:.1f}°C</h5>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.info(f"**Visibility:** {weather_data['visibility']/1000:.1f} km")
+        st.markdown(f"""
+        <div class="metric-card">
+            <h6>💧 Humidity</h6>
+            <h5>{weather_data['main']['humidity']}%</h5>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col3:
-        if 'rain' in weather_data:
-            st.info(f"**Rain (1h):** {weather_data['rain'].get('1h', 0)} mm")
-        else:
-            st.info("**Rain (1h):** 0 mm")
+        st.markdown(f"""
+        <div class="metric-card">
+            <h6>💨 Wind</h6>
+            <h5>{weather_data['wind']['speed']} m/s</h5>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col4:
+        st.markdown(f"""
+        <div class="metric-card">
+            <h6>☁️ Cloud Cover</h6>
+            <h5>{weather_data['clouds']['all']}%</h5>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Second row of metrics
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown(f"""
+        <div class="metric-card">
+            <h6>🌧️ Precipitation</h6>
+            <h5>{weather_data.get('rain', {}).get('1h', 0)} mm</h5>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div class="metric-card">
+            <h6>📊 Pressure</h6>
+            <h5>{weather_data['main']['pressure']} hPa</h5>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown(f"""
+        <div class="metric-card">
+            <h6>👁️ Visibility</h6>
+            <h5>{weather_data['visibility']/1000:.1f} km</h5>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        # UV Index (simulated since free API doesn't include it)
+        uv_index = "Moderate" if temp > 20 else "Low"
+        st.markdown(f"""
+        <div class="metric-card">
+            <h6>☀️ UV Index</h6>
+            <h5>{uv_index}</h5>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Climate overview and sunrise/sunset side by side
+    st.markdown("### 🌍 Climate Overview")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        climate_info = get_climate_summary(city, temp, weather_desc)
+        st.markdown(f"""
+        <div class="climate-summary">
+            <h6>🌤️ Weather Overview</h6>
+            <p style="font-size: 0.9rem;"><strong>Current Season:</strong> {climate_info['season']}</p>
+            <p style="font-size: 0.9rem;"><strong>Climate Type:</strong> {climate_info['climate']}</p>
+            <p style="font-size: 0.9rem;"><strong>Description:</strong> {climate_info['description']}</p>
+            <p style="font-size: 0.9rem;"><strong>Hottest Month:</strong> July (typically 25-30°C)</p>
+            <p style="font-size: 0.9rem;"><strong>Coldest Month:</strong> January (typically 0-5°C)</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
         sunrise = datetime.fromtimestamp(weather_data['sys']['sunrise'])
         sunset = datetime.fromtimestamp(weather_data['sys']['sunset'])
-        st.info(f"**Sunrise:** {sunrise.strftime('%H:%M')}")
-        st.info(f"**Sunset:** {sunset.strftime('%H:%M')}")
+        
+        st.markdown(f"""
+        <div class="feature-highlight" style="padding: 1.2rem; margin-bottom: 0.5rem;">
+            <h5 style="color: black; margin: 0.3rem 0;">🌅 Sunrise</h5>
+            <p style="font-size: 1.3rem; font-weight: bold; color: black; margin: 0.5rem 0;">{sunrise.strftime('%H:%M')}</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown(f"""
+        <div class="feature-highlight" style="padding: 1.2rem;">
+            <h5 style="color: black; margin: 0.3rem 0;">🌇 Sunset</h5>
+            <p style="font-size: 1.3rem; font-weight: bold; color: black; margin: 0.5rem 0;">{sunset.strftime('%H:%M')}</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 def display_forecast(forecast_data):
-    """Display 5-day weather forecast"""
+    """Display 5-day weather forecast with enhanced charts"""
     if not forecast_data:
         return
     
@@ -150,29 +461,60 @@ def display_forecast(forecast_data):
             'Temperature (°C)': temp,
             'Humidity (%)': humidity,
             'Weather': weather_desc,
-            'Icon': weather_icon
+            'Icon': weather_icon,
+            'Color': get_weather_color(temp)
         })
     
     df = pd.DataFrame(daily_data)
     
-    # Create temperature chart
-    fig_temp = px.line(df, x='Time', y='Temperature (°C)', 
-                      title='Temperature Forecast (5 Days)',
-                      markers=True)
-    fig_temp.update_layout(xaxis_title="Time", yaxis_title="Temperature (°C)")
+    # Enhanced temperature chart
+    fig_temp = go.Figure()
+    
+    fig_temp.add_trace(go.Scatter(
+        x=df['Time'],
+        y=df['Temperature (°C)'],
+        mode='lines+markers',
+        name='Temperature',
+        line=dict(color='#667eea', width=3),
+        marker=dict(size=8, color=df['Color'])
+    ))
+    
+    fig_temp.update_layout(
+        title='🌡️ Temperature Forecast (5 Days)',
+        xaxis_title="Time",
+        yaxis_title="Temperature (°C)",
+        template='plotly_white',
+        height=300,
+        showlegend=False
+    )
+    
     st.plotly_chart(fig_temp, use_container_width=True)
     
-    # Create humidity chart
-    fig_humidity = px.bar(df, x='Time', y='Humidity (%)',
-                         title='Humidity Forecast (5 Days)',
-                         color='Humidity (%)')
-    fig_humidity.update_layout(xaxis_title="Time", yaxis_title="Humidity (%)")
+    # Enhanced humidity chart
+    fig_humidity = go.Figure()
+    
+    fig_humidity.add_trace(go.Bar(
+        x=df['Time'],
+        y=df['Humidity (%)'],
+        name='Humidity',
+        marker_color='#764ba2',
+        opacity=0.8
+    ))
+    
+    fig_humidity.update_layout(
+        title='💧 Humidity Forecast (5 Days)',
+        xaxis_title="Time",
+        yaxis_title="Humidity (%)",
+        template='plotly_white',
+        height=300,
+        showlegend=False
+    )
+    
     st.plotly_chart(fig_humidity, use_container_width=True)
     
-    # Display forecast table
-    st.subheader("Detailed Forecast")
+    # Daily summary cards
+    st.subheader("📅 Daily Forecast Summary")
     
-    # Group by date and show daily summary
     daily_summary = df.groupby('Date').agg({
         'Temperature (°C)': ['min', 'max', 'mean'],
         'Humidity (%)': 'mean',
@@ -183,29 +525,25 @@ def display_forecast(forecast_data):
     daily_summary.columns = ['Min Temp', 'Max Temp', 'Avg Temp', 'Avg Humidity', 'Weather', 'Icon']
     daily_summary = daily_summary.reset_index()
     
-    # Display daily summary
+    # Display daily summary in cards
     for _, row in daily_summary.iterrows():
-        col1, col2, col3, col4, col5 = st.columns(5)
-        
-        with col1:
-            st.write(f"**{row['Date']}**")
-        
-        with col2:
-            st.write(f"{row['Icon']} {row['Weather']}")
-        
-        with col3:
-            st.write(f"**{row['Min Temp']}°C** / **{row['Max Temp']}°C**")
-        
-        with col4:
-            st.write(f"Avg: **{row['Avg Temp']}°C**")
-        
-        with col5:
-            st.write(f"Humidity: **{row['Avg Humidity']}%**")
-        
-        st.divider()
+        st.markdown(f"""
+        <div class="forecast-card fade-in">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h6>{row['Date']}</h6>
+                    <p style="font-size: 0.9rem;">{row['Icon']} {row['Weather']}</p>
+                </div>
+                <div style="text-align: right;">
+                    <h6>{row['Min Temp']}°C / {row['Max Temp']}°C</h6>
+                    <p style="font-size: 0.9rem;">Avg: {row['Avg Temp']}°C | 💧 {row['Avg Humidity']}%</p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 def display_weather_map(weather_data, forecast_data):
-    """Display interactive weather map"""
+    """Display interactive weather map with enhanced styling"""
     if not weather_data:
         return
     
@@ -213,18 +551,30 @@ def display_weather_map(weather_data, forecast_data):
     lat = weather_data['coord']['lat']
     lon = weather_data['coord']['lon']
     
-    m = folium.Map(location=[lat, lon], zoom_start=10)
+    m = folium.Map(
+        location=[lat, lon], 
+        zoom_start=10,
+        tiles='OpenStreetMap'
+    )
     
-    # Add current weather marker
+    # Add current weather marker with enhanced popup
     current_temp = weather_data['main']['temp']
     current_desc = weather_data['weather'][0]['description']
     current_icon = get_weather_icon(weather_data['weather'][0]['icon'])
     
     folium.Marker(
         [lat, lon],
-        popup=f"{current_icon} {current_desc}<br>Temperature: {current_temp}°C",
+        popup=f"""
+        <div style="text-align: center;">
+            <h3>{current_icon} Current Weather</h3>
+            <p><strong>{current_desc}</strong></p>
+            <p><strong>Temperature:</strong> {current_temp}°C</p>
+            <p><strong>Humidity:</strong> {weather_data['main']['humidity']}%</p>
+            <p><strong>Wind:</strong> {weather_data['wind']['speed']} m/s</p>
+        </div>
+        """,
         tooltip=f"Current Weather: {current_temp}°C",
-        icon=folium.Icon(color='red', icon='info-sign')
+        icon=folium.Icon(color='red', icon='info-sign', prefix='fa')
     ).add_to(m)
     
     # Add forecast markers if available
@@ -240,74 +590,81 @@ def display_weather_map(weather_data, forecast_data):
             
             folium.Marker(
                 [forecast_lat, forecast_lon],
-                popup=f"{forecast_icon} {forecast_desc}<br>Temperature: {forecast_temp}°C<br>Time: {forecast_time}",
+                popup=f"""
+                <div style="text-align: center;">
+                    <h4>{forecast_icon} Forecast</h4>
+                    <p><strong>{forecast_desc}</strong></p>
+                    <p><strong>Temperature:</strong> {forecast_temp}°C</p>
+                    <p><strong>Time:</strong> {forecast_time}</p>
+                </div>
+                """,
                 tooltip=f"Forecast {forecast_time}: {forecast_temp}°C",
-                icon=folium.Icon(color='blue', icon='cloud')
+                icon=folium.Icon(color='blue', icon='cloud', prefix='fa')
             ).add_to(m)
     
     # Display the map
-    st.subheader("Weather Map")
-    folium_static(m)
+    st.markdown('<div class="map-container">', unsafe_allow_html=True)
+    st.subheader("🗺️ Weather Map")
+    folium_static(m, width=800, height=350)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def main():
-    st.title("🌤️ Weather App")
-    st.markdown("Get current weather conditions and forecasts for any city around the world!")
+    # Enhanced header
+    st.markdown("""
+    <div class="main-header">
+        <h1>🌤️ Weather App</h1>
+        <p style="font-size: 1rem; margin: 0;">Get real-time weather conditions and forecasts for any city around the world!</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # Sidebar for city input
-    st.sidebar.header("📍 Location")
-    city = st.sidebar.text_input("Enter city name:", value="London")
+    # Small sidebar with just city input
+    with st.sidebar:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem; border-radius: 15px; color: white; text-align: center;">
+            <h4>📍 Enter City</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        city = st.text_input("City name:", value="London", key="city_input")
+        
+        # Add space to push developer credit to bottom
+        st.markdown("<br>" * 8, unsafe_allow_html=True)
+        
+        # Developer credit at bottom of sidebar
+        st.markdown("""
+        <div class="sidebar-credit">
+            <p style="margin: 0; font-size: 1rem; font-weight: bold;">🚀 Developed by Ian Menezes</p>
+            <p style="margin: 0; font-size: 0.8rem;">A beautiful weather app built with Python and Streamlit</p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    if st.sidebar.button("Get Weather", type="primary"):
+    # Weather display logic in main area
+    if st.button("🌤️ Get Weather", type="primary", use_container_width=True):
         if not API_KEY or API_KEY == "your_api_key_here":
             st.error("⚠️ Please set your OpenWeather API key in the .env file!")
             st.info("Get your free API key from: https://openweathermap.org/api")
             return
         
-        # Get weather data
-        with st.spinner("Fetching weather data..."):
+        # Get weather data with loading animation
+        with st.spinner("🌤️ Fetching weather data..."):
             weather_data = get_weather_data(city, API_KEY)
             forecast_data = get_forecast_data(city, API_KEY)
         
         if weather_data:
-            st.success(f"✅ Weather data loaded for {city}")
-            
             # Create tabs for different features
             tab1, tab2, tab3 = st.tabs(["🌡️ Current Weather", "📅 5-Day Forecast", "🗺️ Weather Map"])
             
             with tab1:
-                st.header(f"Current Weather in {city}")
-                display_current_weather(weather_data)
+                display_current_weather(weather_data, city)
             
             with tab2:
-                st.header(f"5-Day Forecast for {city}")
+                st.header(f"📅 5-Day Forecast for {city}")
                 display_forecast(forecast_data)
             
             with tab3:
                 display_weather_map(weather_data, forecast_data)
         else:
             st.error("❌ Could not fetch weather data. Please check the city name and try again.")
-    
-    # Instructions
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### Instructions")
-    st.sidebar.markdown("""
-    1. Enter a city name in the input field
-    2. Click 'Get Weather' to fetch data
-    3. Explore the three tabs:
-       - **Current Weather**: Live conditions
-       - **5-Day Forecast**: Extended predictions
-       - **Weather Map**: Interactive map view
-    """)
-    
-    # API key setup instructions
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### Setup")
-    st.sidebar.markdown("""
-    To use this app, you need an OpenWeather API key:
-    1. Sign up at [OpenWeather](https://openweathermap.org/api)
-    2. Create a `.env` file in this directory
-    3. Add: `OPENWEATHER_API_KEY=your_api_key_here`
-    """)
 
 if __name__ == "__main__":
     main() 
