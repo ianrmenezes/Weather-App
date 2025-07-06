@@ -59,6 +59,57 @@ A beautiful and interactive weather application built with Python and Streamlit 
    - Navigate to [http://localhost:8501](http://localhost:8501) (or the port shown in your terminal)
    - Enter a city name and explore the weather data!
 
+## 🌐 Deployment
+
+### Streamlit Cloud (Recommended)
+
+**Streamlit Cloud is the best option for deploying Streamlit apps:**
+
+1. **Push your code to GitHub** (if not already done)
+   ```bash
+   git add .
+   git commit -m "Ready for deployment"
+   git push origin main
+   ```
+
+2. **Sign up for Streamlit Cloud**
+   - Go to [share.streamlit.io](https://share.streamlit.io)
+   - Sign in with your GitHub account
+
+3. **Deploy your app**
+   - Click "New app"
+   - Select your repository: `your-username/Weather-App`
+   - Set the main file path: `app.py`
+   - Add your environment variables:
+     - Key: `OPENWEATHER_API_KEY`
+     - Value: Your OpenWeather API key
+   - Click "Deploy"
+
+4. **Your app will be live** at: `https://your-app-name-your-username.streamlit.app`
+
+### Alternative Deployment Options
+
+#### Railway
+- Go to [railway.app](https://railway.app)
+- Connect your GitHub repository
+- Add environment variable: `OPENWEATHER_API_KEY`
+- Deploy automatically
+
+#### Render
+- Go to [render.com](https://render.com)
+- Create a new Web Service
+- Connect your GitHub repository
+- Set build command: `pip install -r requirements.txt`
+- Set start command: `streamlit run app.py`
+- Add environment variable: `OPENWEATHER_API_KEY`
+
+### Why Not Vercel?
+
+Vercel is designed for static sites and serverless functions, not for Python applications like Streamlit that require:
+- Persistent server environment
+- WebSocket connections for real-time updates
+- Python runtime with specific dependencies
+
 ## 📋 Dependencies
 
 - **Streamlit**: Web application framework
