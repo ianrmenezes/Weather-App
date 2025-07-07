@@ -8,6 +8,7 @@ from streamlit_folium import folium_static
 from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
+import streamlit.components.v1 as components
 
 # Load environment variables
 load_dotenv()
@@ -361,8 +362,173 @@ st.markdown("""
         position: relative;
         z-index: 10;
     }
+
+    /* --- FORCE REMOVE RED TAB INDICATOR --- */
+    [data-testid="stTabs"] [data-testid^="stTab"]::before,
+    [data-testid="stTabs"] [data-testid^="stTab"]::after,
+    [data-testid="stTabs"] [role="tab"]::before,
+    [data-testid="stTabs"] [role="tab"]::after,
+    [data-testid="stTabs"] [data-testid^="stTabPanel"]::before,
+    [data-testid="stTabs"] [data-testid^="stTabPanel"]::after {
+        display: none !important;
+        content: none !important;
+        border: none !important;
+        background: none !important;
+        box-shadow: none !important;
+        height: 0 !important;
+        width: 0 !important;
+    }
+    [data-testid="stTabs"] [role="tablist"] {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    [data-testid="stTabs"] [role="tab"] {
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* --- ULTRA FORCE REMOVE RED TAB INDICATOR --- */
+    [data-testid="stTabs"] div[role="tablist"] > div {
+        border: none !important;
+        border-top: none !important;
+        border-bottom: none !important;
+        background: none !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+    }
+    [data-testid="stTabs"] div[role="tablist"] > * {
+        border: none !important;
+        border-top: none !important;
+        border-bottom: none !important;
+        background: none !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+    }
+    [data-testid="stTabs"] div[role="tablist"] [style*="red"],
+    [data-testid="stTabs"] div[role="tablist"] [style*="#f00"],
+    [data-testid="stTabs"] div[role="tablist"] [style*="rgb(255, 0, 0)"] {
+        border: none !important;
+        background: none !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+    }
+
+    /* Hide the default radio dot */
+    div[data-testid="stRadio"] > label > div:first-child { display: none !important; }
+    /* Style the radio as tabs */
+    div[data-testid="stRadio"] label {
+        background: rgba(255,255,255,0.08);
+        color: #fff;
+        border: none;
+        border-radius: 10px 10px 0 0;
+        padding: 10px 28px;
+        font-size: 1.08rem;
+        font-weight: 500;
+        cursor: pointer;
+        margin-right: 8px;
+        margin-bottom: -2px;
+        transition: background 0.2s, color 0.2s;
+        box-shadow: 0 2px 8px rgba(102,126,234,0.08);
+    }
+    div[data-testid="stRadio"] label[data-selected="true"] {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        font-weight: bold;
+        border-bottom: 2px solid transparent;
+        box-shadow: 0 4px 16px rgba(102,126,234,0.18);
+    }
+    div[data-testid="stRadio"] label:hover {
+        background: rgba(102,126,234,0.18);
+        color: #fff;
+    }
+    div[data-testid="stRadio"] { margin-bottom: 18px; }
+
+    /* Sidebar as full-height flex column */
+    [data-testid="stSidebar"] > div:first-child {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100vh !important;
+        min-height: 100vh !important;
+        padding: 0 !important;
+    }
+    .sidebar-main {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        width: 100%;
+    }
+    .sidebar-enter-city {
+        position: static !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        border-radius: 14px !important;
+        box-sizing: border-box;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding-top: 0.7rem;
+        padding-bottom: 0.7rem;
+        color: white;
+        text-align: center;
+        z-index: 1;
+    }
+    .sidebar-credit {
+        flex-shrink: 0;
+        width: 100% !important;
+        border-radius: 0 !important;
+        box-sizing: border-box;
+        background: rgba(255,255,255,0.1);
+        padding: 1.2rem 1rem;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border-top: 1px solid rgba(255,255,255,0.2);
+        margin: 0 !important;
+        text-align: center;
+    }
+    /* Modern, right-aligned collapse button */
+    [data-testid="stSidebarCollapseControl"] {
+        display: none !important;
+    }
 </style>
 """, unsafe_allow_html=True)
+
+# --- Inject JavaScript to forcibly hide the tab indicator ---
+components.html('''
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+  function hideTabIndicator() {
+    // Find all tablists
+    document.querySelectorAll('[data-testid="stTabs"] [role="tablist"]').forEach(tablist => {
+      // Hide any direct child div with a red border or background
+      Array.from(tablist.children).forEach(child => {
+        const style = window.getComputedStyle(child);
+        if (
+          style.borderTopColor === 'rgb(255, 0, 0)' ||
+          style.backgroundColor === 'rgb(255, 0, 0)' ||
+          style.borderTop.includes('red') ||
+          style.borderTop.includes('#f00')
+        ) {
+          child.style.display = 'none';
+        }
+        // Also hide if it has a borderTopWidth > 0 and is not a tab button
+        if (
+          parseInt(style.borderTopWidth) > 0 &&
+          !child.getAttribute('role')
+        ) {
+          child.style.display = 'none';
+        }
+      });
+    });
+  }
+  hideTabIndicator();
+  // Also run again after a short delay in case of rerender
+  setTimeout(hideTabIndicator, 1000);
+});
+</script>
+''', height=0)
 
 # API Configuration
 API_KEY = os.getenv("OPENWEATHER_API_KEY", "your_api_key_here")
@@ -464,18 +630,18 @@ def display_current_weather(weather_data, city):
     
     with col2:
         st.markdown(f"""
-        <div class="weather-card fade-in" style="max-width: 320px; margin: 0 auto;">
+        <div class="weather-card fade-in" style="max-width: 320px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <div class="weather-icon-large">{weather_icon}</div>
             <div class="temperature-display">{temp:.1f}°C</div>
-            <div style="text-align: center; margin: 0.2rem 0;">
-                <h4 style="margin: 0.2rem 0; font-size: 1.1rem;">{weather_desc}</h4>
-                <p style="margin: 0.2rem 0; font-size: 0.85rem;">{city}</p>
+            <div style="margin: 0.2rem 0; width: 100%; display: flex; flex-direction: column; align-items: flex-start;">
+                <h4 style="margin: 0.2rem 0 0.2rem 18px; font-size: 1.1rem; align-self: flex-start;">{weather_desc}</h4>
+                <p style="margin: 0.2rem 0 0.2rem 18px; font-size: 0.85rem; align-self: flex-start;">{city}</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
     
     # Weather metrics in a grid below
-    st.markdown("### 📊 Weather Details")
+    st.markdown("### 🌡️ Weather Details")
     
     # First row of metrics
     col1, col2, col3, col4 = st.columns(4)
@@ -558,39 +724,69 @@ def display_current_weather(weather_data, city):
     
     # Climate overview and sunrise/sunset side by side
     st.markdown("### 🌍 Climate Overview")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        climate_info = get_climate_summary(city, temp, weather_desc)
-        st.markdown(f"""
-        <div class="climate-summary">
-            <h6>🌤️ Weather Overview</h6>
-            <p style="font-size: 0.9rem;"><strong>Current Season:</strong> {climate_info['season']}</p>
-            <p style="font-size: 0.9rem;"><strong>Climate Type:</strong> {climate_info['climate']}</p>
-            <p style="font-size: 0.9rem;"><strong>Description:</strong> {climate_info['description']}</p>
-            <p style="font-size: 0.9rem;"><strong>Hottest Month:</strong> July (typically 25-30°C)</p>
-            <p style="font-size: 0.9rem;"><strong>Coldest Month:</strong> January (typically 0-5°C)</p>
+    climate_info = get_climate_summary(city, temp, weather_desc)
+    sunrise = datetime.fromtimestamp(weather_data['sys']['sunrise'])
+    sunset = datetime.fromtimestamp(weather_data['sys']['sunset'])
+    # --- Parent container for alignment ---
+    st.markdown(f"""
+    <div style='width: 100%;'>
+        <div style="display: flex; gap: 1.5rem; align-items: stretch; margin-bottom: 0.5rem;">
+            <div style="flex: 2.2; display: flex; flex-direction: column; min-width: 0;">
+                <div class="climate-summary" style="width: 100%; min-height: 200px; display: flex; flex-direction: column; justify-content: stretch;">
+                    <h6>🌤️ Weather Overview</h6>
+                    <p style="font-size: 0.9rem;"><strong>Current Season:</strong> {climate_info['season']}</p>
+                    <p style="font-size: 0.9rem;"><strong>Climate Type:</strong> {climate_info['climate']}</p>
+                    <p style="font-size: 0.9rem;"><strong>Description:</strong> {climate_info['description']}</p>
+                    <p style="font-size: 0.9rem;"><strong>Hottest Month:</strong> July (typically 25-30°C)</p>
+                    <p style="font-size: 0.9rem;"><strong>Coldest Month:</strong> January (typically 0-5°C)</p>
+                </div>
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 1rem; min-width: 0;">
+                <div class="feature-highlight" style="padding: 1.2rem; margin-bottom: 0.5rem; min-height: 90px;">
+                    <h5 style="color: black; margin: 0.3rem 0;">🌅 Sunrise</h5>
+                    <p style="font-size: 1.3rem; font-weight: bold; color: black; margin: 0.5rem 0;">{sunrise.strftime('%H:%M')}</p>
+                </div>
+                <div class="feature-highlight" style="padding: 1.2rem; min-height: 90px;">
+                    <h5 style="color: black; margin: 0.3rem 0;">🌇 Sunset</h5>
+                    <p style="font-size: 1.3rem; font-weight: bold; color: black; margin: 0.5rem 0;">{sunset.strftime('%H:%M')}</p>
+                </div>
+            </div>
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        sunrise = datetime.fromtimestamp(weather_data['sys']['sunrise'])
-        sunset = datetime.fromtimestamp(weather_data['sys']['sunset'])
-        
-        st.markdown(f"""
-        <div class="feature-highlight" style="padding: 1.2rem; margin-bottom: 0.5rem;">
-            <h5 style="color: black; margin: 0.3rem 0;">🌅 Sunrise</h5>
-            <p style="font-size: 1.3rem; font-weight: bold; color: black; margin: 0.5rem 0;">{sunrise.strftime('%H:%M')}</p>
+        <!-- Combined Weather News Card -->
+        <div style='width: 100%; background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%); box-shadow: 0 4px 24px rgba(0,0,0,0.12); border-radius: 18px; padding: 1.5rem 2.2rem; margin: 0 auto 1.5rem auto;'>
+            <div style="font-size: 1.25rem; font-weight: bold; color: #fff; margin-bottom: 0.7rem; letter-spacing: 0.5px;">🌍 Global Weather News</div>
+            <div style="display: flex; flex-direction: column; gap: 1.1rem;">
+                <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                    <span style="font-size: 2rem;">🌪️</span>
+                    <div>
+                        <span style="font-weight: bold; color: #fff; font-size: 1.08rem;">Tornado Strikes US Midwest</span><br/>
+                        <span style="color: #fff; font-size: 0.98rem; font-weight: 500;">Severe tornadoes cause damage in Oklahoma and Kansas</span><br/>
+                        <span style="color: #e0e0e0; font-size: 0.95rem;">Multiple tornadoes touched down, destroying homes and leaving thousands without power. Emergency services are responding to affected areas.</span><br/>
+                        <span style="color: #d0f0ff; font-size: 0.92rem;">Source: <a href='https://www.cnn.com/2023/06/20/weather/tornado-midwest/index.html' target='_blank' style='color:#fff; text-decoration:underline;'>CNN</a></span>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                    <span style="font-size: 2rem;">🌧️</span>
+                    <div>
+                        <span style="font-weight: bold; color: #fff; font-size: 1.08rem;">Monsoon Floods in India</span><br/>
+                        <span style="color: #fff; font-size: 0.98rem; font-weight: 500;">Heavy rains cause widespread flooding in Assam</span><br/>
+                        <span style="color: #e0e0e0; font-size: 0.95rem;">Thousands have been displaced as rivers overflow, submerging villages and farmland. Relief efforts are underway.</span><br/>
+                        <span style="color: #d0f0ff; font-size: 0.92rem;">Source: <a href='https://www.aljazeera.com/news/2023/7/10/india-monsoon-floods-assam' target='_blank' style='color:#fff; text-decoration:underline;'>Al Jazeera</a></span>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                    <span style="font-size: 2rem;">🔥</span>
+                    <div>
+                        <span style="font-weight: bold; color: #fff; font-size: 1.08rem;">Wildfires Rage in Australia</span><br/>
+                        <span style="color: #fff; font-size: 0.98rem; font-weight: 500;">Blazes force evacuations in New South Wales</span><br/>
+                        <span style="color: #e0e0e0; font-size: 0.95rem;">Firefighters are battling intense wildfires as dry conditions and high winds spread flames across the region. Residents have been urged to evacuate.</span><br/>
+                        <span style="color: #d0f0ff; font-size: 0.92rem;">Source: <a href='https://www.abc.net.au/news/2023-08-15/nsw-bushfires-evacuations/102728456' target='_blank' style='color:#fff; text-decoration:underline;'>ABC News Australia</a></span>
+                    </div>
+                </div>
+            </div>
         </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown(f"""
-        <div class="feature-highlight" style="padding: 1.2rem;">
-            <h5 style="color: black; margin: 0.3rem 0;">🌇 Sunset</h5>
-            <p style="font-size: 1.3rem; font-weight: bold; color: black; margin: 0.5rem 0;">{sunset.strftime('%H:%M')}</p>
-        </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 
 def display_forecast(forecast_data):
     """Display 5-day weather forecast with enhanced charts"""
@@ -682,14 +878,14 @@ def display_forecast(forecast_data):
     for _, row in daily_summary.iterrows():
         st.markdown(f"""
         <div class="forecast-card fade-in">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h6>{row['Date']}</h6>
-                    <p style="font-size: 0.9rem;">{row['Icon']} {row['Weather']}</p>
+            <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start;">
+                <div style="display: flex; flex-direction: column; align-items: flex-start; margin-right: 1.5rem;">
+                    <span style="font-size: 1.05rem; font-weight: 600; margin-bottom: 0.1rem;">{row['Date']}</span>
+                    <span style="font-size: 0.98rem; margin-top: 0;">{row['Icon']} {row['Weather']}</span>
                 </div>
-                <div style="text-align: right;">
-                    <h6>{row['Min Temp']}°C / {row['Max Temp']}°C</h6>
-                    <p style="font-size: 0.9rem;">Avg: {row['Avg Temp']}°C | 💧 {row['Avg Humidity']}%</p>
+                <div style="text-align: right; align-self: center;">
+                    <h6 style="margin: 0;">{row['Min Temp']}°C / {row['Max Temp']}°C</h6>
+                    <span style="font-size: 0.9rem;">Avg: {row['Avg Temp']}°C | 💧 {row['Avg Humidity']}%</span>
                 </div>
             </div>
         </div>
@@ -773,51 +969,158 @@ def main():
     # Small sidebar with just city input
     with st.sidebar:
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem; border-radius: 15px; color: white; text-align: center;">
-            <h4>📍 Enter City</h4>
-        </div>
+        <style>
+        [data-testid="stSidebarCollapseControl"] { display: none !important; }
+        
+        /* Make the sidebar container full height */
+        section[data-testid="stSidebar"] {
+            height: 100vh !important;
+            width: 260px !important;
+            min-width: 260px !important;
+            max-width: 260px !important;
+        }
+        
+        /* Target the main sidebar content container */
+        section[data-testid="stSidebar"] > div {
+            height: 100vh !important;
+            display: flex !important;
+            flex-direction: column !important;
+            padding: 0 !important;
+        }
+        
+        .sidebar-main {
+            padding: 0;
+            flex: 0 0 auto;
+        }
+        
+        .sidebar-enter-city {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem;
+            margin: 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .sidebar-enter-city h4 {
+            margin: 0;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        .city-input-container {
+            padding: 1rem;
+        }
+        
+        .sidebar-spacer {
+            flex: 1 1 auto;
+        }
+        
+        .sidebar-credit {
+            flex: 0 0 auto !important;
+            width: 100% !important;
+            border-radius: 14px !important;
+            box-sizing: border-box;
+            background: rgba(255,255,255,0.1);
+            padding: 1.2rem 1rem;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            margin: 0 !important;
+            text-align: center;
+        }
+        </style>
         """, unsafe_allow_html=True)
+        st.markdown('<div class="sidebar-main">', unsafe_allow_html=True)
         
-        city = st.text_input("City name:", value="London", key="city_input")
-        
-        # Add space to push developer credit to bottom
-        st.markdown("<br>" * 8, unsafe_allow_html=True)
-        
-        # Developer credit at bottom of sidebar
+        # City input section header that extends full width
         st.markdown("""
-        <div class="sidebar-credit">
-            <p style="margin: 0; font-size: 1rem; font-weight: bold;">🚀 Developed by Ian Menezes</p>
-            <p style="margin: 0; font-size: 0.8rem;">A beautiful weather app built with Python and Streamlit</p>
-        </div>
+            <div class="sidebar-enter-city">
+                <h4>📍 Enter City</h4>
+            </div>
         """, unsafe_allow_html=True)
+        
+        # City input with padding
+        st.markdown('<div class="city-input-container">', unsafe_allow_html=True)
+        city = st.text_input("City name:", value="London", key="city_input")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
     
     # Weather display logic in main area
+    if "weather_data" not in st.session_state:
+        st.session_state["weather_data"] = None
+    if "forecast_data" not in st.session_state:
+        st.session_state["forecast_data"] = None
+
     if st.button("🌤️ Get Weather", type="primary", use_container_width=True):
         if not API_KEY or API_KEY == "your_api_key_here":
             st.error("⚠️ Please set your OpenWeather API key in the .env file!")
             st.info("Get your free API key from: https://openweathermap.org/api")
             return
-        
         # Get weather data with loading animation
         with st.spinner("🌤️ Fetching weather data..."):
             weather_data = get_weather_data(city, API_KEY)
             forecast_data = get_forecast_data(city, API_KEY)
-        
         if weather_data:
-            # Create tabs for different features
-            tab1, tab2, tab3 = st.tabs(["🌡️ Current Weather", "📅 5-Day Forecast", "🗺️ Weather Map"])
-            
-            with tab1:
-                display_current_weather(weather_data, city)
-            
-            with tab2:
-                st.header(f"📅 5-Day Forecast for {city}")
-                display_forecast(forecast_data)
-            
-            with tab3:
-                display_weather_map(weather_data, forecast_data)
+            st.session_state["weather_data"] = weather_data
+            st.session_state["forecast_data"] = forecast_data
         else:
+            st.session_state["weather_data"] = None
+            st.session_state["forecast_data"] = None
             st.error("❌ Could not fetch weather data. Please check the city name and try again.")
+
+    # Always render the tab bar and content if weather data exists
+    if st.session_state["weather_data"]:
+        tab_options = ["🌡️ Current Weather", "📅 5-Day Forecast", "🗺️ Weather Map"]
+        st.markdown("""
+        <style>
+        /* Hide the default radio dot */
+        div[data-testid=\"stRadio\"] > label > div:first-child { display: none !important; }
+        /* Style the radio as tabs */
+        div[data-testid=\"stRadio\"] label {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            border: none;
+            border-radius: 10px 10px 0 0;
+            padding: 10px 28px;
+            font-size: 1.08rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-bottom: -2px;
+            transition: background 0.2s, color 0.2s;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.08);
+        }
+        div[data-testid=\"stRadio\"] label[data-selected=\"true\"] {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            font-weight: bold;
+            border-bottom: 2px solid transparent;
+            box-shadow: 0 4px 16px rgba(102,126,234,0.18);
+        }
+        div[data-testid=\"stRadio\"] label:hover {
+            background: rgba(102,126,234,0.18);
+            color: #fff;
+        }
+        div[data-testid=\"stRadio\"] { margin-bottom: 18px; }
+        </style>
+        """, unsafe_allow_html=True)
+        selected_tab = st.radio(
+            "",
+            tab_options,
+            horizontal=True,
+            key="custom_tabs_radio",
+            label_visibility="collapsed"
+        )
+        if selected_tab == "🌡️ Current Weather":
+            display_current_weather(st.session_state["weather_data"], city)
+        elif selected_tab == "📅 5-Day Forecast":
+            st.header(f"📅 5-Day Forecast for {city}")
+            display_forecast(st.session_state["forecast_data"])
+        elif selected_tab == "🗺️ Weather Map":
+            display_weather_map(st.session_state["weather_data"], st.session_state["forecast_data"])
 
 if __name__ == "__main__":
     main() 
