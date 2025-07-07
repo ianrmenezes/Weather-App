@@ -2,6 +2,12 @@
 
 A beautiful and interactive weather application built with Python and Streamlit that provides current weather conditions and forecasts for any city around the world.
 
+## 🌐 Live App
+
+**Try the app now:** [Weather App](https://weather-app-erachaxm6d22gb6axgh4wd.streamlit.app)
+
+---
+
 ## ✨ Features
 
 ### 1. 🌡️ Current Weather Display
