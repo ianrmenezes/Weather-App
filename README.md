@@ -4,9 +4,7 @@ A beautiful and interactive weather application built with Python and Streamlit 
 
 ## 🌐 Live App
 
-**Try the app now:** [Weather App](https://weather-app-erachaxm6d22gb6axgh4wd.streamlit.app)
-
----
+**Try it now 👉** [Weather App](https://weather-app-erachaxm6d22gb6axgh4wd.streamlit.app)
 
 ## ✨ Features
 
@@ -20,16 +18,16 @@ A beautiful and interactive weather application built with Python and Streamlit 
 ### 2. 📅 5-Day Weather Forecast
 - Interactive temperature and humidity charts using Plotly
 - Detailed hourly forecasts for the next 5 days
-- Daily weather summaries with min/max temperatures
+- Daily summaries with min/max temperatures
 - Weather condition icons and descriptions
-- Visual data representation with line and bar charts
+- Visual data with line and bar charts
 
 ### 3. 🗺️ Interactive Weather Maps
 - Interactive maps using Folium
 - Current weather location markers
-- Forecast markers for upcoming weather conditions
-- Popup information with weather details
-- Geographic visualization of weather data
+- Forecast markers for upcoming weather
+- Popups with weather details
+- Geographic visualization of conditions
 
 ## 🚀 Quick Start
 
@@ -118,59 +116,49 @@ Vercel is designed for static sites and serverless functions, not for Python app
 
 ## 📋 Dependencies
 
-- **Streamlit**: Web application framework
-- **Requests**: HTTP library for API calls
-- **Pandas**: Data manipulation and analysis
-- **Plotly**: Interactive charts and visualizations
-- **Folium**: Interactive maps
-- **Streamlit-Folium**: Streamlit integration for maps
-- **Python-dotenv**: Environment variable management
+- **Streamlit** – Web framework
+- **Requests** – API calls
+- **Pandas** – Data handling
+- **Plotly** – Interactive charts
+- **Folium** – Map rendering
+- **Streamlit-Folium** – Folium integration
+- **Python-dotenv** – Environment variable handling
 
 ## 🎯 How to Use
 
-1. **Enter a city name** in the sidebar input field
-2. **Click "Get Weather"** to fetch current and forecast data
-3. **Explore the three tabs**:
-   - **Current Weather**: Live conditions and detailed metrics
-   - **5-Day Forecast**: Extended predictions with interactive charts
-   - **Weather Map**: Geographic visualization of weather data
-
-## 🔧 Configuration
-
-The app uses environment variables for configuration. Create a `.env` file with:
-
-```
-OPENWEATHER_API_KEY=your_api_key_here
-```
+1. Open the app in your browser
+2. Enter a city name in the sidebar
+3. Click "Get Weather"
+4. Navigate through the tabs:
+   - **Current Weather**: Live details
+   - **5-Day Forecast**: Charts and trends
+   - **Weather Map**: Visual geographic data
 
 ## 📊 Data Sources
 
-- **OpenWeather API**: Provides current weather and forecast data
-- **Free tier**: 1,000 calls per day (sufficient for personal use)
+- **OpenWeather API** — Provides current and forecast weather data
+- (Free tier includes 1,000 calls/day – perfect for personal use)
 
 ## 🎨 Features in Detail
 
 ### Current Weather Tab
-- Temperature metrics with "feels like" comparison
-- Humidity and wind speed indicators
-- Weather condition with emoji icons
-- Atmospheric pressure and visibility
-- Rain data (if available)
-- Sunrise and sunset times
+- "Feels like" temperature
+- Humidity, wind, and pressure
+- Weather condition icons
+- Visibility and rain info
+- Sunrise/sunset times
 
 ### Forecast Tab
-- Interactive temperature line chart
-- Humidity bar chart with color coding
-- Daily weather summaries
-- Min/max temperature ranges
-- Average conditions per day
+- Temperature line chart
+- Humidity bar chart
+- Daily summaries
+- Min/max temperatures
 
 ### Map Tab
-- Interactive map centered on the selected city
-- Current weather marker (red)
-- Forecast markers (blue) for upcoming conditions
-- Popup information with weather details
-- Geographic context for weather data
+- Map centered on selected city
+- Red marker = current weather
+- Blue markers = forecasts
+- Popup weather details
 
 ## 🤝 Contributing
 
@@ -184,8 +172,8 @@ Feel free to contribute to this project by:
 
 This project is open source and available under the MIT License.
 
-## 🙏 Acknowledgments
+## �� Acknowledgments
 
-- OpenWeather for providing the weather API
-- Streamlit for the amazing web app framework
-- The Python community for excellent libraries
+- **OpenWeather** – for the awesome weather API
+- **Streamlit** – for making web apps easy
+- **The Python community** – for the amazing libraries
