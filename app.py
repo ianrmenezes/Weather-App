@@ -269,6 +269,16 @@ st.markdown("""
         position: relative;
         z-index: 10;
     }
+    .sun-time {
+        font-size: 2.1rem;
+        font-weight: 400;
+        color: #222;
+        text-shadow: 0 1px 6px rgba(0,0,0,0.08);
+        letter-spacing: 1px;
+        text-align: center;
+        margin-top: 0.1rem;
+        margin-bottom: 0.1rem;
+    }
     
     .loading-animation {
         text-align: center;
@@ -742,13 +752,13 @@ def display_current_weather(weather_data, city):
                 </div>
             </div>
             <div style="flex: 1; display: flex; flex-direction: column; gap: 1rem; min-width: 0;">
-                <div class="feature-highlight" style="padding: 1.2rem; margin-bottom: 0.5rem; min-height: 90px;">
-                    <h5 style="color: black; margin: 0.3rem 0;">🌅 Sunrise</h5>
-                    <p style="font-size: 1.3rem; font-weight: bold; color: black; margin: 0.5rem 0;">{sunrise.strftime('%H:%M')}</p>
+                <div class="feature-highlight" style="padding: 1.2rem; margin-bottom: 0.5rem; min-height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div style="font-size: 1.2rem; font-weight: 600; color: black; margin-bottom: 0.5rem; text-align: center;">🌅 Sunrise</div>
+                    <div class="sun-time">{sunrise.strftime('%H:%M')}</div>
                 </div>
-                <div class="feature-highlight" style="padding: 1.2rem; min-height: 90px;">
-                    <h5 style="color: black; margin: 0.3rem 0;">🌇 Sunset</h5>
-                    <p style="font-size: 1.3rem; font-weight: bold; color: black; margin: 0.5rem 0;">{sunset.strftime('%H:%M')}</p>
+                <div class="feature-highlight" style="padding: 1.2rem; min-height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div style="font-size: 1.2rem; font-weight: 600; color: black; margin-bottom: 0.5rem; text-align: center;">🌇 Sunset</div>
+                    <div class="sun-time">{sunset.strftime('%H:%M')}</div>
                 </div>
             </div>
         </div>
