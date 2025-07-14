@@ -1142,89 +1142,15 @@ def main():
         <p style="font-size: 1rem; margin: 0;">Get real-time weather conditions and forecasts for any city around the world!</p>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Small sidebar with just city input
-    with st.sidebar:
-        st.markdown("""
-        <style>
-        [data-testid="stSidebarCollapseControl"] { display: none !important; }
-        
-        /* Make the sidebar container full height */
-        section[data-testid="stSidebar"] {
-            height: 100vh !important;
-            width: 260px !important;
-            min-width: 260px !important;
-            max-width: 260px !important;
-        }
-        
-        /* Target the main sidebar content container */
-        section[data-testid="stSidebar"] > div {
-            height: 100vh !important;
-            display: flex !important;
-            flex-direction: column !important;
-            padding: 0 !important;
-        }
-        
-        .sidebar-main {
-            padding: 0;
-            flex: 0 0 auto;
-        }
-        
-        .sidebar-enter-city {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 1rem;
-            margin: 0;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        
-        .sidebar-enter-city h4 {
-            margin: 0;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: bold;
-        }
-        
-        .city-input-container {
-            padding: 1rem;
-        }
-        
-        .sidebar-spacer {
-            flex: 1 1 auto;
-        }
-        
-        .sidebar-credit {
-            flex: 0 0 auto !important;
-            width: 100% !important;
-            border-radius: 14px !important;
-            box-sizing: border-box;
-            background: rgba(255,255,255,0.1);
-            padding: 1.2rem 1rem;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-top: 1px solid rgba(255,255,255,0.2);
-            margin: 0 !important;
-            text-align: center;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-        st.markdown('<div class="sidebar-main">', unsafe_allow_html=True)
-        
-        # City input section header that extends full width
-        st.markdown("""
-            <div class="sidebar-enter-city">
-                <h4>📍 Enter City</h4>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        # City input with padding
-        st.markdown('<div class="city-input-container">', unsafe_allow_html=True)
-        city = st.text_input("City name:", value="London", key="city_input")
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-    
+
+    # City input card at the top of the main page
+    st.markdown("""
+    <div class="sidebar-enter-city" style="max-width: 400px; margin: 0 auto 1.5rem auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.2rem 1.5rem; border-radius: 14px; color: white; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.2);">
+        <h4 style="margin: 0 0 0.7rem 0; color: white; font-size: 1.1rem; font-weight: bold;">📍 Enter City</h4>
+    """, unsafe_allow_html=True)
+    city = st.text_input("City name:", value="London", key="city_input", label_visibility="collapsed")
+    st.markdown("</div>", unsafe_allow_html=True)
+
     # Weather display logic in main area
     if "weather_data" not in st.session_state:
         st.session_state["weather_data"] = None
