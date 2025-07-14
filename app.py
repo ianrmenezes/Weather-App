@@ -565,13 +565,13 @@ def get_weather_news():
     
     if news_api_key:
         try:
-            # Fetch weather-related news from NewsAPI
+            # Fetch weather-related news from NewsAPI (more specific query)
             news_url = "https://newsapi.org/v2/everything"
             params = {
-                'q': 'weather OR climate OR storm OR hurricane OR tornado OR flood OR wildfire',
+                'q': '"weather forecast" OR "severe weather" OR "climate change" OR "storm warning" OR flooding OR hurricane OR tornado OR wildfire OR heatwave OR blizzard -entertainment -health -sports -finance',
                 'language': 'en',
                 'sortBy': 'publishedAt',
-                'pageSize': 6,
+                'pageSize': 8,
                 'apiKey': news_api_key
             }
             
@@ -580,9 +580,19 @@ def get_weather_news():
                 news_data = response.json()
                 articles = news_data.get('articles', [])
                 
-                if articles:
+                # Filter out unrelated articles by checking for weather keywords in title/description
+                keywords = [
+                    'weather', 'forecast', 'storm', 'hurricane', 'tornado', 'flood', 'wildfire', 'heatwave', 'blizzard', 'climate', 'rain', 'snow', 'drought', 'typhoon', 'cyclone', 'lightning', 'thunder', 'wind', 'temperature', 'cold', 'hot', 'heat', 'freezing', 'frost', 'hail', 'meteorological', 'atmosphere', 'precipitation', 'severe weather', 'storm warning', 'flooding'
+                ]
+                filtered_articles = []
+                for article in articles:
+                    text = (article.get('title', '') + ' ' + article.get('description', '')).lower()
+                    if any(kw in text for kw in keywords):
+                        filtered_articles.append(article)
+                
+                if filtered_articles:
                     weather_news = []
-                    for article in articles[:3]:  # Get top 3 articles
+                    for article in filtered_articles[:3]:  # Get top 3 filtered articles
                         weather_news.append({
                             'title': article.get('title', 'Weather Update'),
                             'description': article.get('description', 'Weather-related news'),
