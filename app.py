@@ -673,23 +673,10 @@ def get_fallback_weather_news():
     ]
 
 def display_weather_news():
-    """Display weather news with automatic updates"""
-    # Add refresh button
-    col1, col2 = st.columns([3, 1])
-    
-    with col1:
-        st.markdown("### 📰 Global Weather News")
-    
-    with col2:
-        if st.button("🔄 Refresh News", type="secondary", use_container_width=True):
-            # Clear cache to force refresh
-            if WEATHER_NEWS_CACHE_KEY in st.session_state:
-                del st.session_state[WEATHER_NEWS_CACHE_KEY]
-            st.rerun()
-    
+    """Display weather news as a single card with refresh and update time inside"""
     # Get fresh weather news
     weather_news = get_weather_news()
-    
+
     # Calculate time since last update
     if WEATHER_NEWS_CACHE_KEY in st.session_state:
         last_update = st.session_state[WEATHER_NEWS_CACHE_KEY]['timestamp']
@@ -697,17 +684,34 @@ def display_weather_news():
         minutes_since_update = int(time_since_update // 60)
     else:
         minutes_since_update = 0
-    
-    # Display news section
+
+    # Card style for the news section
     st.markdown(f"""
-    <div style='width: 100%; background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%); box-shadow: 0 4px 24px rgba(0,0,0,0.12); border-radius: 18px; padding: 1.5rem 2.2rem; margin: 0 auto 1.5rem auto;'>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.7rem;">
-            <div style="font-size: 1.25rem; font-weight: bold; color: #fff; letter-spacing: 0.5px;">🌍 Global Weather News</div>
-            <div style="font-size: 0.85rem; color: #d0f0ff; font-style: italic;">Updated {minutes_since_update} min ago</div>
+    <div style='width: 100%; background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%); box-shadow: 0 4px 24px rgba(0,0,0,0.12); border-radius: 18px; padding: 2.2rem 2.2rem 1.5rem 2.2rem; margin: 0 auto 1.5rem auto;'>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+            <div style="display: flex; align-items: center; gap: 0.7rem;">
+                <span style='font-size: 2rem;'>🌍</span>
+                <span style="font-size: 1.5rem; font-weight: bold; color: #fff; letter-spacing: 0.5px;">Global Weather News</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.7rem;">
+                <form action="#" method="post">
+                    <button type="submit" name="refresh_news" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 18px; padding: 0.4rem 1.2rem; font-weight: bold; font-size: 1rem; cursor: pointer; margin-right: 0.7rem;">🔄 Refresh News</button>
+                </form>
+                <span style="font-size: 0.98rem; color: #d0f0ff; font-style: italic;">Updated {minutes_since_update} min ago</span>
+            </div>
         </div>
         <div style="display: flex; flex-direction: column; gap: 1.1rem;">
     """, unsafe_allow_html=True)
-    
+
+    # Handle refresh button (Streamlit workaround)
+    refresh_clicked = st.session_state.get('refresh_news_clicked', False)
+    if 'refresh_news_button' not in st.session_state:
+        st.session_state['refresh_news_button'] = False
+    if st.button("", key="refresh_news_button", help="Refresh News", args=()):
+        if WEATHER_NEWS_CACHE_KEY in st.session_state:
+            del st.session_state[WEATHER_NEWS_CACHE_KEY]
+        st.rerun()
+
     for i, news in enumerate(weather_news):
         # Format the published date
         try:
@@ -718,19 +722,18 @@ def display_weather_news():
                 formatted_date = "Recent"
         except:
             formatted_date = "Recent"
-        
         st.markdown(f"""
             <div style="display: flex; align-items: flex-start; gap: 1rem;">
                 <span style="font-size: 2rem;">{news['icon']}</span>
                 <div style="flex: 1;">
-                    <span style="font-weight: bold; color: #fff; font-size: 1.08rem;">{news['title']}</span><br/>
-                    <span style="color: #fff; font-size: 0.98rem; font-weight: 500;">{news['description']}</span><br/>
-                    <span style="color: #e0e0e0; font-size: 0.95rem;">{news['content'][:150]}{'...' if len(news['content']) > 150 else ''}</span><br/>
-                    <span style="color: #d0f0ff; font-size: 0.92rem;">Source: <a href='{news['url']}' target='_blank' style='color:#fff; text-decoration:underline;'>{news['source']}</a> • {formatted_date}</span>
+                    <span style="font-weight: bold; color: #fff; font-size: 1.18rem;">{news['title']}</span><br/>
+                    <span style="color: #fff; font-size: 1.02rem; font-weight: 500;">{news['description']}</span><br/>
+                    <span style="color: #e0e0e0; font-size: 0.98rem;">{news['content'][:180]}{'...' if len(news['content']) > 180 else ''}</span><br/>
+                    <span style="color: #d0f0ff; font-size: 0.96rem;">Source: <a href='{news['url']}' target='_blank' style='color:#fff; text-decoration:underline;'>{news['source']}</a> • {formatted_date}</span>
                 </div>
             </div>
         """, unsafe_allow_html=True)
-    
+
     st.markdown("</div></div>", unsafe_allow_html=True)
 
 def get_weather_data(city, api_key):
