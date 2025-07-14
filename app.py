@@ -839,13 +839,20 @@ def display_current_weather(weather_data, city):
     
     with col2:
         st.markdown(f"""
-        <div class="weather-card fade-in" style="max-width: 320px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-            <div class="weather-icon-large">{weather_icon}</div>
-            <div class="temperature-display">{temp:.1f}°C</div>
-            <div style="margin: 0.2rem 0; width: 100%; display: flex; flex-direction: column; align-items: flex-start;">
-                <h4 style="margin: 0.2rem 0 0.2rem 18px; font-size: 1.1rem; align-self: flex-start;">{weather_desc}</h4>
-                <p style="margin: 0.2rem 0 0.2rem 18px; font-size: 0.85rem; align-self: flex-start;">{city}</p>
-            </div>
+        <div class="weather-card fade-in" style="
+            max-width: 320px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2.2rem 1.2rem 1.5rem 1.2rem;
+            box-sizing: border-box;
+        ">
+            <div class="weather-icon-large" style="margin-bottom: 1.1rem;">{weather_icon}</div>
+            <div class="temperature-display" style="margin-bottom: 0.7rem;">{temp:.1f}°C</div>
+            <div style="margin-bottom: 0.7rem; font-size: 1.1rem; font-weight: 500; color: #fff; text-align: center;">{weather_desc}</div>
+            <div style="font-size: 1rem; color: #e0e0e0; text-align: center; margin-top: 0.2rem;">{city}</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -934,8 +941,9 @@ def display_current_weather(weather_data, city):
     # Climate overview and sunrise/sunset side by side
     st.markdown("### 🌍 Climate Overview")
     climate_info = get_climate_summary(city, temp, weather_desc)
-    sunrise = datetime.fromtimestamp(weather_data['sys']['sunrise'])
-    sunset = datetime.fromtimestamp(weather_data['sys']['sunset'])
+    timezone_offset = weather_data.get('timezone', 0)  # in seconds
+    sunrise = datetime.utcfromtimestamp(weather_data['sys']['sunrise'] + timezone_offset)
+    sunset = datetime.utcfromtimestamp(weather_data['sys']['sunset'] + timezone_offset)
     # --- Parent container for alignment ---
     st.markdown(f"""
     <div style='width: 100%;'>
@@ -965,17 +973,24 @@ def display_current_weather(weather_data, city):
     </div>
     """, unsafe_allow_html=True)
 
-def display_forecast(forecast_data):
+def display_forecast(forecast_data, weather_data=None):
     """Display 5-day weather forecast with enhanced charts"""
     if not forecast_data:
         return
+    
+    # Get timezone offset from weather_data if available
+    timezone_offset = 0
+    if weather_data and 'timezone' in weather_data:
+        timezone_offset = weather_data['timezone']
+    elif 'city' in forecast_data and 'timezone' in forecast_data['city']:
+        timezone_offset = forecast_data['city']['timezone']
     
     # Process forecast data
     forecast_list = forecast_data['list']
     daily_data = []
     
     for item in forecast_list:
-        date = datetime.fromtimestamp(item['dt'])
+        date = datetime.utcfromtimestamp(item['dt'] + timezone_offset)
         temp = item['main']['temp']
         humidity = item['main']['humidity']
         weather_desc = item['weather'][0]['description']
@@ -1076,6 +1091,7 @@ def display_weather_map(weather_data, forecast_data):
     # Create a map centered on the city
     lat = weather_data['coord']['lat']
     lon = weather_data['coord']['lon']
+    timezone_offset = weather_data.get('timezone', 0)
     
     m = folium.Map(
         location=[lat, lon], 
@@ -1112,7 +1128,7 @@ def display_weather_map(weather_data, forecast_data):
             forecast_temp = item['main']['temp']
             forecast_desc = item['weather'][0]['description']
             forecast_icon = get_weather_icon(item['weather'][0]['icon'])
-            forecast_time = datetime.fromtimestamp(item['dt']).strftime('%H:%M')
+            forecast_time = datetime.utcfromtimestamp(item['dt'] + timezone_offset).strftime('%H:%M')
             
             folium.Marker(
                 [forecast_lat, forecast_lon],
@@ -1135,15 +1151,31 @@ def display_weather_map(weather_data, forecast_data):
     st.markdown('</div>', unsafe_allow_html=True)
 
 def main():
-    # Enhanced header
+    # Enhanced header: subtitle 4in from left and single line
     st.markdown("""
-    <div class="main-header">
-        <h1>🌤️ Weather App</h1>
-        <p style="font-size: 1rem; margin: 0;">Get real-time weather conditions and forecasts for any city around the world!</p>
+    <div class="main-header" style="
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem 0 0.2rem 0;
+        border-radius: 15px;
+        margin-bottom: 0.5rem;
+        color: white;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.1);
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: none;
+    ">
+        <div style="max-width: 320px; margin: 0 auto; padding-left: 0.5rem;">
+            <h1 style="margin: 0; font-size: 1.5rem; font-weight: bold; text-align: left;">🌤️ Weather App</h1>
+        </div>
+        <div style="padding-left: 4in; white-space: nowrap; font-size: 1rem; margin: 0; text-align: left;">
+            Get real-time weather conditions and forecasts for any city around the world!
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # City input card at the top of the main page (user's preferred centering)
+    # City input card at the top of the main page (text only, slightly left-shifted)
     st.markdown("""
     <div style="
         max-width: 320px;
@@ -1158,9 +1190,8 @@ def main():
         padding: 1.2rem;
         min-height: 90px;
     ">
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <h4 style="margin: 0; color: white; font-size: 1.08rem; font-weight: bold;">Enter City</h4>
-            <span style="font-size: 1.3rem;">📍</span>
+        <div style="display: flex; align-items: center; margin-left: 0.5rem;">
+            <h4 style="margin: 0; font-size: 1.08rem; font-weight: bold; line-height: 1; display: flex; align-items: center;">Enter City</h4>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1236,7 +1267,7 @@ def main():
             display_current_weather(st.session_state["weather_data"], city)
         elif selected_tab == "📅 5-Day Forecast":
             st.header(f"📅 5-Day Forecast for {city}")
-            display_forecast(st.session_state["forecast_data"])
+            display_forecast(st.session_state["forecast_data"], st.session_state["weather_data"])
         elif selected_tab == "🗺️ Weather Map":
             display_weather_map(st.session_state["weather_data"], st.session_state["forecast_data"])
 
