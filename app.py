@@ -1143,10 +1143,25 @@ def main():
     </div>
     """, unsafe_allow_html=True)
 
-    # City input card at the top of the main page
+    # City input card at the top of the main page (smaller, centered, with centered text)
     st.markdown("""
-    <div class="sidebar-enter-city" style="max-width: 400px; margin: 0 auto 1.5rem auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.2rem 1.5rem; border-radius: 14px; color: white; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.2);">
-        <h4 style="margin: 0 0 0.7rem 0; color: white; font-size: 1.1rem; font-weight: bold;">📍 Enter City</h4>
+    <div style="
+        max-width: 320px;
+        margin: 2rem auto 1.5rem auto;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 14px;
+        color: white;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.1rem 1.2rem 1.2rem 1.2rem;
+        min-height: 90px;
+    ">
+        <div style="display: flex; align-items: center; justify-content: center; width: 100%; min-height: 38px;">
+            <h4 style="margin: 0; color: white; font-size: 1.08rem; font-weight: bold; width: 100%; text-align: center;">📍 Enter City</h4>
+        </div>
     """, unsafe_allow_html=True)
     city = st.text_input("City name:", value="London", key="city_input", label_visibility="collapsed")
     st.markdown("</div>", unsafe_allow_html=True)
