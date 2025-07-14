@@ -673,7 +673,7 @@ def get_fallback_weather_news():
     ]
 
 def display_weather_news():
-    """Display weather news as a single card with refresh and update time inside"""
+    """Display the entire Global Weather News section inside a single card container with gradient background."""
     # Get fresh weather news
     weather_news = get_weather_news()
 
@@ -687,7 +687,7 @@ def display_weather_news():
 
     # Card style for the news section
     st.markdown(f"""
-    <div style='width: 100%; background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%); box-shadow: 0 4px 24px rgba(0,0,0,0.12); border-radius: 18px; padding: 2.2rem 2.2rem 1.5rem 2.2rem; margin: 0 auto 1.5rem auto;'>
+    <div style='width: 100%; max-width: 900px; margin: 0 auto 2rem auto; background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%); box-shadow: 0 4px 24px rgba(0,0,0,0.12); border-radius: 18px; padding: 2.2rem 2.2rem 1.5rem 2.2rem;'>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
             <div style="display: flex; align-items: center; gap: 0.7rem;">
                 <span style='font-size: 2rem;'>🌍</span>
@@ -723,8 +723,8 @@ def display_weather_news():
         except:
             formatted_date = "Recent"
         st.markdown(f"""
-            <div style="display: flex; align-items: flex-start; gap: 1rem;">
-                <span style="font-size: 2rem;">{news['icon']}</span>
+            <div style="display: flex; align-items: flex-start; gap: 1rem; background: rgba(255,255,255,0.04); border-radius: 12px; padding: 1.1rem 1rem; margin-bottom: 0.1rem;">
+                <span style="font-size: 2rem; flex-shrink: 0;">{news['icon']}</span>
                 <div style="flex: 1;">
                     <span style="font-weight: bold; color: #fff; font-size: 1.18rem;">{news['title']}</span><br/>
                     <span style="color: #fff; font-size: 1.02rem; font-weight: 500;">{news['description']}</span><br/>
