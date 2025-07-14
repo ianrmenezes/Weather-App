@@ -33,6 +33,8 @@ A beautiful and interactive weather application built with Python and Streamlit 
 - Latest weather-related news and updates
 - Global weather stories and climate information
 - Curated weather headlines and descriptions
+- **NEW**: Automatic updates every hour with real-time news from NewsAPI
+- Fallback to curated news when API is unavailable
 
 ## 🌐 Deployment (for Developers or Curious Techies)
 
@@ -46,9 +48,11 @@ This is the quickest way to make your weather app live and shareable:
 2. Go to Streamlit Cloud and sign in with your GitHub account
 3. Click on "New app"
 4. Select your GitHub repo and set the main file as `app.py`
-5. Add your API key:
+5. Add your API keys:
    - Key: `OPENWEATHER_API_KEY`
    - Value: your actual OpenWeather API key
+   - Key: `NEWS_API_KEY` (optional)
+   - Value: your NewsAPI key for real-time weather news (get free key from newsapi.org)
 6. Hit Deploy
 
 That's it — your app will be live on the internet! You'll get a link you can share with anyone.
@@ -95,6 +99,7 @@ If you're feeling adventurous, you can also deploy to other platforms:
 ## 📊 Data Sources
 
 - **OpenWeather API** — Provides current and forecast weather data
+- **NewsAPI** — Provides real-time weather news and updates (optional)
 
 ## 🎨 Features in Detail
 
@@ -121,6 +126,9 @@ If you're feeling adventurous, you can also deploy to other platforms:
 - Latest weather headlines and stories
 - Global climate updates and weather events
 - Curated weather-related news content
+- **Automatic updates**: News refreshes every hour
+- **Real-time sources**: When NewsAPI key is provided
+- **Smart fallback**: Curated news when API is unavailable
 
 ## 📝 License
 

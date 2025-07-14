@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 import streamlit.components.v1 as components
+import json
+import time
 
 # Load environment variables
 load_dotenv()
@@ -544,6 +546,193 @@ window.addEventListener('DOMContentLoaded', function() {
 API_KEY = os.getenv("OPENWEATHER_API_KEY", "your_api_key_here")
 BASE_URL = "http://api.openweathermap.org/data/2.5"
 
+# Weather News Configuration
+WEATHER_NEWS_CACHE_DURATION = 3600  # 1 hour in seconds
+WEATHER_NEWS_CACHE_KEY = "weather_news_cache"
+
+def get_weather_news():
+    """Fetch weather news from multiple sources with caching"""
+    current_time = time.time()
+    
+    # Check if we have cached news and it's still fresh
+    if WEATHER_NEWS_CACHE_KEY in st.session_state:
+        cached_data = st.session_state[WEATHER_NEWS_CACHE_KEY]
+        if current_time - cached_data['timestamp'] < WEATHER_NEWS_CACHE_DURATION:
+            return cached_data['news']
+    
+    # Try to fetch real weather news from NewsAPI (if API key is available)
+    news_api_key = os.getenv("NEWS_API_KEY")
+    
+    if news_api_key:
+        try:
+            # Fetch weather-related news from NewsAPI
+            news_url = "https://newsapi.org/v2/everything"
+            params = {
+                'q': 'weather OR climate OR storm OR hurricane OR tornado OR flood OR wildfire',
+                'language': 'en',
+                'sortBy': 'publishedAt',
+                'pageSize': 6,
+                'apiKey': news_api_key
+            }
+            
+            response = requests.get(news_url, params=params, timeout=10)
+            if response.status_code == 200:
+                news_data = response.json()
+                articles = news_data.get('articles', [])
+                
+                if articles:
+                    weather_news = []
+                    for article in articles[:3]:  # Get top 3 articles
+                        weather_news.append({
+                            'title': article.get('title', 'Weather Update'),
+                            'description': article.get('description', 'Weather-related news'),
+                            'content': article.get('content', ''),
+                            'url': article.get('url', '#'),
+                            'source': article.get('source', {}).get('name', 'News Source'),
+                            'published_at': article.get('publishedAt', ''),
+                            'icon': get_weather_news_icon(article.get('title', ''))
+                        })
+                    
+                    # Cache the news
+                    st.session_state[WEATHER_NEWS_CACHE_KEY] = {
+                        'news': weather_news,
+                        'timestamp': current_time
+                    }
+                    return weather_news
+        except Exception as e:
+            st.warning(f"Could not fetch real-time weather news: {e}")
+    
+    # Fallback to curated weather news if API fails or no key
+    if not news_api_key:
+        # Show info about NewsAPI key (only once per session)
+        if "news_api_info_shown" not in st.session_state:
+            st.info("💡 Want real-time weather news? Get a free NewsAPI key from newsapi.org and add it as NEWS_API_KEY in your environment variables!")
+            st.session_state["news_api_info_shown"] = True
+    
+    fallback_news = get_fallback_weather_news()
+    
+    # Cache the fallback news
+    st.session_state[WEATHER_NEWS_CACHE_KEY] = {
+        'news': fallback_news,
+        'timestamp': current_time
+    }
+    
+    return fallback_news
+
+def get_weather_news_icon(title):
+    """Get appropriate weather icon based on news title"""
+    title_lower = title.lower()
+    
+    if any(word in title_lower for word in ['tornado', 'cyclone', 'hurricane']):
+        return '🌪️'
+    elif any(word in title_lower for word in ['flood', 'rain', 'monsoon']):
+        return '🌧️'
+    elif any(word in title_lower for word in ['fire', 'wildfire', 'blaze']):
+        return '🔥'
+    elif any(word in title_lower for word in ['snow', 'blizzard', 'winter']):
+        return '❄️'
+    elif any(word in title_lower for word in ['heat', 'drought', 'hot']):
+        return '🌡️'
+    elif any(word in title_lower for word in ['storm', 'thunder']):
+        return '⛈️'
+    else:
+        return '🌤️'
+
+def get_fallback_weather_news():
+    """Provide curated fallback weather news when API is unavailable"""
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    
+    return [
+        {
+            'title': 'Global Climate Patterns Shift',
+            'description': 'Scientists observe unusual weather patterns across multiple continents',
+            'content': 'Recent climate data shows significant shifts in global weather patterns, affecting regions from the Arctic to the tropics. Researchers are monitoring these changes closely.',
+            'url': 'https://www.climate.gov/news-features',
+            'source': 'Climate.gov',
+            'published_at': current_date,
+            'icon': '🌍'
+        },
+        {
+            'title': 'Extreme Weather Events Increase',
+            'description': 'Frequency of severe storms and natural disasters rises globally',
+            'content': 'Meteorologists report an increase in extreme weather events worldwide, including hurricanes, floods, and heatwaves affecting millions of people.',
+            'url': 'https://www.wmo.int/news',
+            'source': 'World Meteorological Organization',
+            'published_at': current_date,
+            'icon': '⛈️'
+        },
+        {
+            'title': 'Renewable Energy Weather Impact',
+            'description': 'Weather conditions significantly affect renewable energy production',
+            'content': 'Solar and wind energy production varies dramatically with weather conditions, highlighting the importance of accurate weather forecasting for energy planning.',
+            'url': 'https://www.energy.gov/weather',
+            'source': 'Department of Energy',
+            'published_at': current_date,
+            'icon': '☀️'
+        }
+    ]
+
+def display_weather_news():
+    """Display weather news with automatic updates"""
+    # Add refresh button
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        st.markdown("### 📰 Global Weather News")
+    
+    with col2:
+        if st.button("🔄 Refresh News", type="secondary", use_container_width=True):
+            # Clear cache to force refresh
+            if WEATHER_NEWS_CACHE_KEY in st.session_state:
+                del st.session_state[WEATHER_NEWS_CACHE_KEY]
+            st.rerun()
+    
+    # Get fresh weather news
+    weather_news = get_weather_news()
+    
+    # Calculate time since last update
+    if WEATHER_NEWS_CACHE_KEY in st.session_state:
+        last_update = st.session_state[WEATHER_NEWS_CACHE_KEY]['timestamp']
+        time_since_update = time.time() - last_update
+        minutes_since_update = int(time_since_update // 60)
+    else:
+        minutes_since_update = 0
+    
+    # Display news section
+    st.markdown(f"""
+    <div style='width: 100%; background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%); box-shadow: 0 4px 24px rgba(0,0,0,0.12); border-radius: 18px; padding: 1.5rem 2.2rem; margin: 0 auto 1.5rem auto;'>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.7rem;">
+            <div style="font-size: 1.25rem; font-weight: bold; color: #fff; letter-spacing: 0.5px;">🌍 Global Weather News</div>
+            <div style="font-size: 0.85rem; color: #d0f0ff; font-style: italic;">Updated {minutes_since_update} min ago</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1.1rem;">
+    """, unsafe_allow_html=True)
+    
+    for i, news in enumerate(weather_news):
+        # Format the published date
+        try:
+            if news['published_at']:
+                pub_date = datetime.fromisoformat(news['published_at'].replace('Z', '+00:00'))
+                formatted_date = pub_date.strftime('%b %d, %Y')
+            else:
+                formatted_date = "Recent"
+        except:
+            formatted_date = "Recent"
+        
+        st.markdown(f"""
+            <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                <span style="font-size: 2rem;">{news['icon']}</span>
+                <div style="flex: 1;">
+                    <span style="font-weight: bold; color: #fff; font-size: 1.08rem;">{news['title']}</span><br/>
+                    <span style="color: #fff; font-size: 0.98rem; font-weight: 500;">{news['description']}</span><br/>
+                    <span style="color: #e0e0e0; font-size: 0.95rem;">{news['content'][:150]}{'...' if len(news['content']) > 150 else ''}</span><br/>
+                    <span style="color: #d0f0ff; font-size: 0.92rem;">Source: <a href='{news['url']}' target='_blank' style='color:#fff; text-decoration:underline;'>{news['source']}</a> • {formatted_date}</span>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("</div></div>", unsafe_allow_html=True)
+
 def get_weather_data(city, api_key):
     """Get current weather data for a city"""
     url = f"{BASE_URL}/weather"
@@ -762,39 +951,7 @@ def display_current_weather(weather_data, city):
                 </div>
             </div>
         </div>
-        <!-- Combined Weather News Card -->
-        <div style='width: 100%; background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%); box-shadow: 0 4px 24px rgba(0,0,0,0.12); border-radius: 18px; padding: 1.5rem 2.2rem; margin: 0 auto 1.5rem auto;'>
-            <div style="font-size: 1.25rem; font-weight: bold; color: #fff; margin-bottom: 0.7rem; letter-spacing: 0.5px;">🌍 Global Weather News</div>
-            <div style="display: flex; flex-direction: column; gap: 1.1rem;">
-                <div style="display: flex; align-items: flex-start; gap: 1rem;">
-                    <span style="font-size: 2rem;">🌪️</span>
-                    <div>
-                        <span style="font-weight: bold; color: #fff; font-size: 1.08rem;">Tornado Strikes US Midwest</span><br/>
-                        <span style="color: #fff; font-size: 0.98rem; font-weight: 500;">Severe tornadoes cause damage in Oklahoma and Kansas</span><br/>
-                        <span style="color: #e0e0e0; font-size: 0.95rem;">Multiple tornadoes touched down, destroying homes and leaving thousands without power. Emergency services are responding to affected areas.</span><br/>
-                        <span style="color: #d0f0ff; font-size: 0.92rem;">Source: <a href='https://www.cnn.com/2023/06/20/weather/tornado-midwest/index.html' target='_blank' style='color:#fff; text-decoration:underline;'>CNN</a></span>
-                    </div>
-                </div>
-                <div style="display: flex; align-items: flex-start; gap: 1rem;">
-                    <span style="font-size: 2rem;">🌧️</span>
-                    <div>
-                        <span style="font-weight: bold; color: #fff; font-size: 1.08rem;">Monsoon Floods in India</span><br/>
-                        <span style="color: #fff; font-size: 0.98rem; font-weight: 500;">Heavy rains cause widespread flooding in Assam</span><br/>
-                        <span style="color: #e0e0e0; font-size: 0.95rem;">Thousands have been displaced as rivers overflow, submerging villages and farmland. Relief efforts are underway.</span><br/>
-                        <span style="color: #d0f0ff; font-size: 0.92rem;">Source: <a href='https://www.aljazeera.com/news/2023/7/10/india-monsoon-floods-assam' target='_blank' style='color:#fff; text-decoration:underline;'>Al Jazeera</a></span>
-                    </div>
-                </div>
-                <div style="display: flex; align-items: flex-start; gap: 1rem;">
-                    <span style="font-size: 2rem;">🔥</span>
-                    <div>
-                        <span style="font-weight: bold; color: #fff; font-size: 1.08rem;">Wildfires Rage in Australia</span><br/>
-                        <span style="color: #fff; font-size: 0.98rem; font-weight: 500;">Blazes force evacuations in New South Wales</span><br/>
-                        <span style="color: #e0e0e0; font-size: 0.95rem;">Firefighters are battling intense wildfires as dry conditions and high winds spread flames across the region. Residents have been urged to evacuate.</span><br/>
-                        <span style="color: #d0f0ff; font-size: 0.92rem;">Source: <a href='https://www.abc.net.au/news/2023-08-15/nsw-bushfires-evacuations/102728456' target='_blank' style='color:#fff; text-decoration:underline;'>ABC News Australia</a></span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Weather News will be displayed separately -->
     </div>
     """, unsafe_allow_html=True)
 
@@ -1131,6 +1288,9 @@ def main():
             display_forecast(st.session_state["forecast_data"])
         elif selected_tab == "🗺️ Weather Map":
             display_weather_map(st.session_state["weather_data"], st.session_state["forecast_data"])
+
+    # Display weather news
+    display_weather_news()
 
 if __name__ == "__main__":
     main() 
