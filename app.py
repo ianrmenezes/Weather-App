@@ -1143,7 +1143,7 @@ def main():
     </div>
     """, unsafe_allow_html=True)
 
-    # City input card at the top of the main page (text left, icon after text)
+    # City input card at the top of the main page (text right, icon after text)
     st.markdown("""
     <div style="
         max-width: 320px;
@@ -1159,7 +1159,7 @@ def main():
         padding: 1.1rem 1.2rem 1.2rem 1.2rem;
         min-height: 90px;
     ">
-        <div style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; width: 100%; min-height: 38px;">
+        <div style="display: flex; flex-direction: row; align-items: center; justify-content: flex-end; width: 100%; min-height: 38px;">
             <h4 style="margin: 0; color: white; font-size: 1.08rem; font-weight: bold; text-align: left;">Enter City</h4>
             <span style="font-size: 1.3rem; margin-left: 0.6rem; display: flex; align-items: center;">📍</span>
         </div>
