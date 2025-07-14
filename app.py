@@ -673,7 +673,7 @@ def get_fallback_weather_news():
     ]
 
 def display_weather_news():
-    """Display the entire Global Weather News section inside a single card container with gradient background."""
+    """Display the entire Global Weather News section inside a single card container with gradient background and a working Streamlit refresh button."""
     # Get fresh weather news
     weather_news = get_weather_news()
 
@@ -693,21 +693,28 @@ def display_weather_news():
                 <span style='font-size: 2rem;'>🌍</span>
                 <span style="font-size: 1.5rem; font-weight: bold; color: #fff; letter-spacing: 0.5px;">Global Weather News</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 0.7rem;">
-                <form action="#" method="post">
-                    <button type="submit" name="refresh_news" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 18px; padding: 0.4rem 1.2rem; font-weight: bold; font-size: 1rem; cursor: pointer; margin-right: 0.7rem;">🔄 Refresh News</button>
-                </form>
+            <div id="refresh-news-btn-container" style="display: flex; align-items: center; gap: 0.7rem;">
+                <span id="refresh-news-btn-anchor"></span>
                 <span style="font-size: 0.98rem; color: #d0f0ff; font-style: italic;">Updated {minutes_since_update} min ago</span>
             </div>
         </div>
         <div style="display: flex; flex-direction: column; gap: 1.1rem;">
     """, unsafe_allow_html=True)
 
-    # Handle refresh button (Streamlit workaround)
-    refresh_clicked = st.session_state.get('refresh_news_clicked', False)
-    if 'refresh_news_button' not in st.session_state:
-        st.session_state['refresh_news_button'] = False
-    if st.button("", key="refresh_news_button", help="Refresh News", args=()):
+    # Place the Streamlit button using the anchor
+    components.html("""
+    <script>
+    // Move the Streamlit button into the card
+    window.addEventListener('DOMContentLoaded', function() {
+        var btn = document.querySelector('button[kind="secondary"]');
+        var anchor = document.getElementById('refresh-news-btn-anchor');
+        if (btn && anchor && !anchor.hasChildNodes()) {
+            anchor.appendChild(btn);
+        }
+    });
+    </script>
+    """, height=0)
+    if st.button("🔄 Refresh News", key="refresh_news_button", help="Refresh News", type="secondary"):
         if WEATHER_NEWS_CACHE_KEY in st.session_state:
             del st.session_state[WEATHER_NEWS_CACHE_KEY]
         st.rerun()
