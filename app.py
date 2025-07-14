@@ -1143,7 +1143,7 @@ def main():
     </div>
     """, unsafe_allow_html=True)
 
-    # City input card at the top of the main page (smaller, centered, with perfectly centered icon+text)
+    # City input card at the top of the main page (smaller, centered, with perfectly centered text)
     st.markdown("""
     <div style="
         max-width: 320px;
@@ -1160,8 +1160,8 @@ def main():
         min-height: 90px;
     ">
         <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; width: 100%; min-height: 38px;">
-            <span style="font-size: 1.3rem; margin-right: 0.5rem; display: flex; align-items: center;">📍</span>
-            <h4 style="margin: 0; color: white; font-size: 1.08rem; font-weight: bold; text-align: center;">Enter City</h4>
+            <span style="font-size: 1.3rem; margin-right: 1.2rem; display: flex; align-items: center;">📍</span>
+            <h4 style="margin: 0; color: white; font-size: 1.08rem; font-weight: bold; text-align: center; flex: 1;">Enter City</h4>
         </div>
     """, unsafe_allow_html=True)
     city = st.text_input("City name:", value="London", key="city_input", label_visibility="collapsed")
