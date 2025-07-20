@@ -575,10 +575,10 @@ def get_weather_news():
             # Fetch weather-related news from NewsAPI (more specific query)
             news_url = "https://newsapi.org/v2/everything"
             params = {
-                'q': '"weather forecast" OR "severe weather" OR "climate change" OR "storm warning" OR flooding OR hurricane OR tornado OR wildfire OR heatwave OR blizzard -entertainment -health -sports -finance',
+                'q': '"weather forecast" OR "severe weather" OR "climate change" OR "storm warning" OR flooding OR hurricane OR tornado OR wildfire OR heatwave OR blizzard OR "extreme weather" OR "weather alert" -entertainment -health -sports -finance',
                 'language': 'en',
                 'sortBy': 'publishedAt',
-                'pageSize': 8,
+                'pageSize': 20,
                 'apiKey': news_api_key
             }
             
@@ -589,7 +589,7 @@ def get_weather_news():
                 
                 # Filter out unrelated articles by checking for weather keywords in title/description
                 keywords = [
-                    'weather', 'forecast', 'storm', 'hurricane', 'tornado', 'flood', 'wildfire', 'heatwave', 'blizzard', 'climate', 'rain', 'snow', 'drought', 'typhoon', 'cyclone', 'lightning', 'thunder', 'wind', 'temperature', 'cold', 'hot', 'heat', 'freezing', 'frost', 'hail', 'meteorological', 'atmosphere', 'precipitation', 'severe weather', 'storm warning', 'flooding'
+                    'weather', 'forecast', 'storm', 'hurricane', 'tornado', 'flood', 'wildfire', 'heatwave', 'blizzard', 'climate', 'rain', 'snow', 'drought', 'typhoon', 'cyclone', 'lightning', 'thunder', 'wind', 'temperature', 'cold', 'hot', 'heat', 'freezing', 'frost', 'hail', 'meteorological', 'atmosphere', 'precipitation', 'severe weather', 'storm warning', 'flooding', 'extreme', 'alert', 'warning'
                 ]
                 filtered_articles = []
                 for article in articles:
@@ -597,18 +597,41 @@ def get_weather_news():
                     if any(kw in text for kw in keywords):
                         filtered_articles.append(article)
                 
+                # If we don't have enough filtered articles, use all articles (they should be weather-related from the query)
+                if len(filtered_articles) < 3:
+                    filtered_articles = articles[:10]  # Take first 10 articles
+                
                 if filtered_articles:
                     weather_news = []
                     for article in filtered_articles[:3]:  # Get top 3 filtered articles
+                        # Use description instead of content since content is truncated by NewsAPI
+                        content = article.get('content', '')
+                        description = article.get('description', '')
+                        
+                        # If content is truncated, use description instead
+                        if content and '[+' in content:
+                            display_content = description
+                        else:
+                            display_content = content if content else description
+                        
                         weather_news.append({
                             'title': article.get('title', 'Weather Update'),
                             'description': article.get('description', 'Weather-related news'),
-                            'content': article.get('content', ''),
+                            'content': display_content,
                             'url': article.get('url', '#'),
                             'source': article.get('source', {}).get('name', 'News Source'),
                             'published_at': article.get('publishedAt', ''),
                             'icon': get_weather_news_icon(article.get('title', ''))
                         })
+                    
+                    # Ensure we have exactly 3 articles
+                    while len(weather_news) < 3:
+                        # Add fallback articles if we don't have enough
+                        fallback_news = get_fallback_weather_news()
+                        for fallback in fallback_news:
+                            if len(weather_news) >= 3:
+                                break
+                            weather_news.append(fallback)
                     
                     # Cache the news
                     st.session_state[WEATHER_NEWS_CACHE_KEY] = {
@@ -733,12 +756,15 @@ def display_weather_news():
             formatted_date = "Recent"
         st.markdown(f"""
             <div style="display: flex; align-items: flex-start; gap: 1rem; background: rgba(255,255,255,0.04); border-radius: 12px; padding: 1.1rem 1rem; margin-bottom: 0.1rem;">
-                <span style="font-size: 2rem; flex-shrink: 0;">{news['icon']}</span>
+                <span style="font-size: 2rem; flex-shrink: 0;">📰</span>
                 <div style="flex: 1;">
-                    <span style="font-weight: bold; color: #fff; font-size: 1.18rem;">{news['title']}</span><br/>
-                    <span style="color: #fff; font-size: 1.02rem; font-weight: 500;">{news['description']}</span><br/>
-                    <span style="color: #e0e0e0; font-size: 0.98rem;">{news['content'][:180]}{'...' if len(news['content']) > 180 else ''}</span><br/>
-                    <span style="color: #d0f0ff; font-size: 0.96rem;">Source: <a href='{news['url']}' target='_blank' style='color:#fff; text-decoration:underline;'>{news['source']}</a> • {formatted_date}</span>
+                    <div style="font-weight: bold; color: #fff; font-size: 1.18rem; margin-bottom: 0.5rem;">{news['title']}</div>
+                    <div style="color: #fff; font-size: 1.02rem; font-weight: 500; margin-bottom: 0.5rem;">{news['description']}</div>
+                    <div style="color: #e0e0e0; font-size: 0.98rem; line-height: 1.4; margin-bottom: 0.5rem; word-wrap: break-word; white-space: pre-wrap;">{news['content']}</div>
+                    <div style="color: #d0f0ff; font-size: 0.96rem; margin-bottom: 0.5rem;">Source: <a href='{news['url']}' target='_blank' style='color:#fff; text-decoration:underline;'>{news['source']}</a> • {formatted_date}</div>
+                    <div style="margin-top: 0.5rem;">
+                        <a href='{news['url']}' target='_blank' style='background: rgba(255,255,255,0.1); color: #fff; padding: 0.3rem 0.8rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.2);'>📖 Read Full Article</a>
+                    </div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
