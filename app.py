@@ -554,11 +554,18 @@ def get_weather_news():
     """Fetch weather news from multiple sources with caching"""
     current_time = time.time()
     
-    # Check if we have cached news and it's still fresh
-    if WEATHER_NEWS_CACHE_KEY in st.session_state:
+    # Check if force refresh is requested
+    force_refresh = st.session_state.get("force_news_refresh", False)
+    
+    # Check if we have cached news and it's still fresh (unless force refresh is requested)
+    if not force_refresh and WEATHER_NEWS_CACHE_KEY in st.session_state:
         cached_data = st.session_state[WEATHER_NEWS_CACHE_KEY]
         if current_time - cached_data['timestamp'] < WEATHER_NEWS_CACHE_DURATION:
             return cached_data['news']
+    
+    # Clear the force refresh flag
+    if force_refresh:
+        st.session_state["force_news_refresh"] = False
     
     # Try to fetch real weather news from NewsAPI (if API key is available)
     news_api_key = os.getenv("NEWS_API_KEY")
@@ -704,7 +711,9 @@ def display_weather_news():
                 <span style="font-size: 1.5rem; font-weight: bold; color: #fff; letter-spacing: 0.5px;">Global Weather News</span>
             </div>
             <div style="display: flex; align-items: center; gap: 0.7rem;">
-                <span style="font-size: 0.98rem; color: #d0f0ff; font-style: italic;">Updated {minutes_since_update} min ago</span>
+                <span style="font-size: 0.98rem; color: #d0f0ff; font-style: italic;">
+                    {f"Updated {minutes_since_update} min ago" if minutes_since_update > 0 else "Just updated"}
+                </span>
             </div>
         </div>
         <div style="display: flex; flex-direction: column; gap: 1.1rem;">
@@ -1288,8 +1297,12 @@ def main():
     
     # Place the button BEFORE the weather news
     if st.button("🔄 Refresh News", key="refresh_news_button", help="Refresh News", type="secondary"):
+        # Force refresh by clearing cache and adding a flag
         if WEATHER_NEWS_CACHE_KEY in st.session_state:
             del st.session_state[WEATHER_NEWS_CACHE_KEY]
+        # Add a flag to force refresh
+        st.session_state["force_news_refresh"] = True
+        st.success("🔄 Refreshing weather news...")
         st.rerun()
     
     # Display weather news
