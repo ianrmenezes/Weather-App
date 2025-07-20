@@ -695,39 +695,53 @@ def display_weather_news():
     else:
         minutes_since_update = 0
 
-    # Card style for the news section
+    # Card style for the news section - positioned more to the left
     st.markdown(f"""
     <div style='width: 100%; max-width: 900px; margin: 0 auto 2rem auto; background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%); box-shadow: 0 4px 24px rgba(0,0,0,0.12); border-radius: 18px; padding: 2.2rem 2.2rem 1.5rem 2.2rem;'>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
-            <div style="display: flex; align-items: center; gap: 0.7rem;">
+            <div style="display: flex; align-items: center; gap: 0.7rem; margin-left: -2rem;">
                 <span style='font-size: 2rem;'>🌍</span>
                 <span style="font-size: 1.5rem; font-weight: bold; color: #fff; letter-spacing: 0.5px;">Global Weather News</span>
             </div>
-            <div id="refresh-news-btn-container" style="display: flex; align-items: center; gap: 0.7rem;">
-                <span id="refresh-news-btn-anchor"></span>
+            <div style="display: flex; align-items: center; gap: 0.7rem;">
                 <span style="font-size: 0.98rem; color: #d0f0ff; font-style: italic;">Updated {minutes_since_update} min ago</span>
             </div>
         </div>
         <div style="display: flex; flex-direction: column; gap: 1.1rem;">
     """, unsafe_allow_html=True)
 
-    # Place the Streamlit button using the anchor
-    components.html("""
-    <script>
-    // Move the Streamlit button into the card
-    window.addEventListener('DOMContentLoaded', function() {
-        var btn = document.querySelector('button[kind="secondary"]');
-        var anchor = document.getElementById('refresh-news-btn-anchor');
-        if (btn && anchor && !anchor.hasChildNodes()) {
-            anchor.appendChild(btn);
-        }
-    });
-    </script>
-    """, height=0)
-    if st.button("🔄 Refresh News", key="refresh_news_button", help="Refresh News", type="secondary"):
-        if WEATHER_NEWS_CACHE_KEY in st.session_state:
-            del st.session_state[WEATHER_NEWS_CACHE_KEY]
-        st.rerun()
+    # Place the refresh button above the card with proper positioning
+    st.markdown("""
+    <style>
+    /* Style the refresh button */
+    .stButton > button[kind="secondary"] {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    .stButton > button[kind="secondary"]:hover {
+        background: rgba(255,255,255,0.2);
+        transform: translateY(-1px);
+    }
+    </style>
+    <div style="margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: flex-start; margin-left: 2rem;">
+            <div id="refresh-button-container"></div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Place the button in the left column
+    col1, col2, col3 = st.columns([1, 3, 1])
+    with col1:
+        if st.button("🔄 Refresh News", key="refresh_news_button", help="Refresh News", type="secondary"):
+            if WEATHER_NEWS_CACHE_KEY in st.session_state:
+                del st.session_state[WEATHER_NEWS_CACHE_KEY]
+            st.rerun()
 
     for i, news in enumerate(weather_news):
         # Format the published date
