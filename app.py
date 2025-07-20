@@ -710,33 +710,7 @@ def display_weather_news():
         <div style="display: flex; flex-direction: column; gap: 1.1rem;">
     """, unsafe_allow_html=True)
 
-    # Simple approach: place button before the card with left margin
-    st.markdown("""
-    <style>
-    /* Style the refresh button */
-    .stButton > button[kind="secondary"] {
-        background: rgba(255,255,255,0.1) !important;
-        border: 1px solid rgba(255,255,255,0.3) !important;
-        color: white !important;
-        border-radius: 8px !important;
-        padding: 0.5rem 1rem !important;
-        font-size: 0.9rem !important;
-        transition: all 0.3s ease !important;
-        margin-left: 2rem !important;
-        margin-bottom: 1rem !important;
-    }
-    .stButton > button[kind="secondary"]:hover {
-        background: rgba(255,255,255,0.2) !important;
-        transform: translateY(-1px) !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    # Place the button before the card
-    if st.button("🔄 Refresh News", key="refresh_news_button", help="Refresh News", type="secondary"):
-        if WEATHER_NEWS_CACHE_KEY in st.session_state:
-            del st.session_state[WEATHER_NEWS_CACHE_KEY]
-        st.rerun()
+
 
     for i, news in enumerate(weather_news):
         # Format the published date
@@ -1290,6 +1264,34 @@ def main():
         elif selected_tab == "🗺️ Weather Map":
             display_weather_map(st.session_state["weather_data"], st.session_state["forecast_data"])
 
+    # Add refresh button before weather news
+    st.markdown("""
+    <style>
+    /* Style the refresh button */
+    .stButton > button[kind="secondary"] {
+        background: rgba(255,255,255,0.1) !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        color: white !important;
+        border-radius: 8px !important;
+        padding: 0.5rem 1rem !important;
+        font-size: 0.9rem !important;
+        transition: all 0.3s ease !important;
+        margin-left: 2rem !important;
+        margin-bottom: 1rem !important;
+    }
+    .stButton > button[kind="secondary"]:hover {
+        background: rgba(255,255,255,0.2) !important;
+        transform: translateY(-1px) !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Place the button BEFORE the weather news
+    if st.button("🔄 Refresh News", key="refresh_news_button", help="Refresh News", type="secondary"):
+        if WEATHER_NEWS_CACHE_KEY in st.session_state:
+            del st.session_state[WEATHER_NEWS_CACHE_KEY]
+        st.rerun()
+    
     # Display weather news
     display_weather_news()
 
