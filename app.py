@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 import streamlit.components.v1 as components
 import json
 import time
+import math # Added for math.cos and math.sin in display_weather_map
 
 # Load environment variables
 load_dotenv()
@@ -1226,71 +1227,156 @@ def display_forecast(forecast_data, weather_data=None):
         st.info("Please try refreshing the page or checking your internet connection.")
 
 def display_weather_map(weather_data, forecast_data):
-    """Display interactive weather map with enhanced styling"""
+    """Display interactive weather map with simple, clean, and fantastic design"""
     if not weather_data:
         return
     
-    # Create a map centered on the city
+    # Create a map centered on the city with clean styling
     lat = weather_data['coord']['lat']
     lon = weather_data['coord']['lon']
     timezone_offset = weather_data.get('timezone', 0)
     
+    # Create map with clean tile layer
     m = folium.Map(
         location=[lat, lon], 
-        zoom_start=10,
-        tiles='OpenStreetMap'
+        zoom_start=11,
+        tiles='CartoDB positron',
+        control_scale=True
     )
     
-    # Add current weather marker with enhanced popup
+    # Add current weather marker with simple popup
     current_temp = weather_data['main']['temp']
     current_desc = weather_data['weather'][0]['description']
     current_icon = get_weather_icon(weather_data['weather'][0]['icon'])
     
+    # Simple, clean popup for current weather
+    current_popup_html = f"""
+    <div style="
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        color: white;
+        font-family: 'Segoe UI', sans-serif;
+        min-width: 200px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    ">
+        <div style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">{current_icon}</div>
+            <h3 style="margin: 0; font-size: 1.1rem; font-weight: bold;">Current Weather</h3>
+            <div style="
+                background: rgba(255,255,255,0.1);
+                border-radius: 8px;
+                padding: 0.8rem;
+                margin-top: 0.8rem;
+            ">
+                <p style="margin: 0.3rem 0; font-size: 1rem;"><strong>{current_temp}°C</strong></p>
+                <p style="margin: 0.3rem 0; font-size: 0.9rem;">{current_desc.title()}</p>
+            </div>
+        </div>
+    </div>
+    """
+    
+    # Add current weather marker
     folium.Marker(
         [lat, lon],
-        popup=f"""
-        <div style="text-align: center;">
-            <h3>{current_icon} Current Weather</h3>
-            <p><strong>{current_desc}</strong></p>
-            <p><strong>Temperature:</strong> {current_temp}°C</p>
-            <p><strong>Humidity:</strong> {weather_data['main']['humidity']}%</p>
-            <p><strong>Wind:</strong> {weather_data['wind']['speed']} m/s</p>
-        </div>
-        """,
-        tooltip=f"Current Weather: {current_temp}°C",
+        popup=folium.Popup(current_popup_html, max_width=250),
+        tooltip=f"📍 {current_temp}°C - {current_desc.title()}",
         icon=folium.Icon(color='red', icon='info-sign', prefix='fa')
     ).add_to(m)
     
     # Add forecast markers if available
-    if forecast_data:
+    if forecast_data and 'list' in forecast_data:
         forecast_list = forecast_data['list']
-        for i, item in enumerate(forecast_list[:8]):  # Show first 8 forecasts
-            forecast_lat = lat + (i * 0.01)  # Offset slightly for visibility
-            forecast_lon = lon + (i * 0.01)
+        
+        # Simple circle around the city
+        folium.Circle(
+            location=[lat, lon],
+            radius=3000,
+            color='#667eea',
+            fill=True,
+            fill_color='#667eea',
+            fill_opacity=0.1,
+            weight=2,
+            opacity=0.6
+        ).add_to(m)
+        
+        # Add forecast markers in a simple pattern
+        for i, item in enumerate(forecast_list[:4]):  # Show first 4 forecasts
+            angle = (i * 90) * (3.14159 / 180)  # 90 degrees apart
+            radius = 0.015
+            forecast_lat = lat + (radius * math.cos(angle))
+            forecast_lon = lon + (radius * math.sin(angle))
+            
             forecast_temp = item['main']['temp']
             forecast_desc = item['weather'][0]['description']
             forecast_icon = get_weather_icon(item['weather'][0]['icon'])
             forecast_time = datetime.utcfromtimestamp(item['dt'] + timezone_offset).strftime('%H:%M')
             
+            # Simple forecast popup
+            forecast_popup_html = f"""
+            <div style="
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                border-radius: 12px;
+                padding: 1.5rem;
+                color: white;
+                font-family: 'Segoe UI', sans-serif;
+                min-width: 180px;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            ">
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">{forecast_icon}</div>
+                    <h4 style="margin: 0; font-size: 1rem; font-weight: bold;">Forecast</h4>
+                    <div style="
+                        background: rgba(255,255,255,0.1);
+                        border-radius: 8px;
+                        padding: 0.8rem;
+                        margin-top: 0.8rem;
+                    ">
+                        <p style="margin: 0.3rem 0; font-size: 1rem;"><strong>{forecast_time}</strong></p>
+                        <p style="margin: 0.3rem 0; font-size: 0.9rem;"><strong>{forecast_temp}°C</strong></p>
+                        <p style="margin: 0.3rem 0; font-size: 0.8rem;">{forecast_desc.title()}</p>
+                    </div>
+                </div>
+            </div>
+            """
+            
             folium.Marker(
                 [forecast_lat, forecast_lon],
-                popup=f"""
-                <div style="text-align: center;">
-                    <h4>{forecast_icon} Forecast</h4>
-                    <p><strong>{forecast_desc}</strong></p>
-                    <p><strong>Temperature:</strong> {forecast_temp}°C</p>
-                    <p><strong>Time:</strong> {forecast_time}</p>
-                </div>
-                """,
-                tooltip=f"Forecast {forecast_time}: {forecast_temp}°C",
+                popup=folium.Popup(forecast_popup_html, max_width=220),
+                tooltip=f"⏰ {forecast_time}: {forecast_temp}°C",
                 icon=folium.Icon(color='blue', icon='cloud', prefix='fa')
             ).add_to(m)
     
-    # Display the map
-    st.markdown('<div class="map-container">', unsafe_allow_html=True)
-    st.subheader("🗺️ Weather Map")
-    folium_static(m, width=800, height=350)
-    st.markdown('</div>', unsafe_allow_html=True)
+    # Map container with title inside
+    st.markdown("""
+    <div style="
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 1.2rem;
+        margin: 1rem 0;
+        max-width: 650px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        border: 2px solid rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+    ">
+        <div style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+            margin-left: -1cm;
+            text-align: center;
+        ">
+            <span style="font-size: 1.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🗺️</span>
+            <h2 style="margin: 0; font-size: 1.3rem; font-weight: bold; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Weather Map</h2>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Display the map with proper sizing
+    folium_static(m, width=650, height=400)
+    
+    st.markdown("</div>", unsafe_allow_html=True)
 
 def main():
     # Modern header with enhanced styling
