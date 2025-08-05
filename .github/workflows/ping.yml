@@ -1,0 +1,13 @@
+name: Keep Streamlit App Awake
+
+on:
+  schedule:
+    - cron: "*/3 * * * *"  # Runs every 3 minutes
+  workflow_dispatch:       # Allows manual triggering if needed
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send request to Streamlit app
+        run: curl -s https://weather-app-erachaxm6d22gb6axgh4wd.streamlit.app

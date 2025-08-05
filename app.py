@@ -1382,11 +1382,11 @@ def main():
     # Modern header with enhanced styling
     st.markdown("""
     <div class="main-header fade-in">
-        <div style="max-width: 320px; margin: 0 auto; padding-left: 0.5rem;">
-            <h1 style="margin: 0; font-size: 2rem; font-weight: bold; text-align: left;">🌤️ Weather App</h1>
-        </div>
-        <div style="padding-left: 3.5in; white-space: nowrap; font-size: 1.1rem; margin: 0; text-align: left; opacity: 0.9;">
-            Get real-time weather conditions and forecasts for any city around the world!
+        <div style="text-align: center;">
+            <h1 style="margin: 0; font-size: 2rem; font-weight: bold;">🌤️ Weather App</h1>
+            <div style="font-size: 1.1rem; opacity: 0.9; margin-top: 0.5rem;">
+                Get real-time weather conditions and forecasts for any city around the world!
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
